@@ -16,7 +16,7 @@ SELECT * FROM sentences
 -- name: update-sentence!
 -- update an existing sentence record
 UPDATE sentences
-SET tags = :tags
+SET tags = :tags, num_edits = num_edits + 1
 WHERE id = :id
 
 -- name: delete-sentence!

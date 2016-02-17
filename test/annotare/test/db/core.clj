@@ -49,30 +49,35 @@
 
     (is (= 1 (count (db/get-project-documents 1))))
 
-    (is (= "foo" (:name (db/update-document!
-                          (assoc doc-stored :name "foo")))))
+    (is (= doc-updated (db/update-document! (assoc doc-updated :project_id 5))))
 
-    (is (= (assoc doc-stored :name "foo") (db/delete-document! 1)))
+    (is (= doc-updated (db/delete-document! 1)))
 
     (is (nil? (db/get-document 1)))))
 
 (deftest test-sentences
   (db/create-project! dummy-project)
   (db/create-document! dummy-document)
-  (let [sent-stored (db/create-sentence! dummy-sent)]
-    (is (= (assoc dummy-sent :id 1) sent-stored))
+  (let [sent-stored (db/create-sentence! dummy-sent)
+        sent-updated (merge sent-stored {:tags ["O" "O" "O" "LOC"]
+                                         :num_edits 1})]
+    (is (= (assoc dummy-sent :id 1 :num_edits 0) sent-stored))
 
     (is (= sent-stored (first (db/get-sentences))))
 
     (is (= sent-stored (first (db/get-document-sentences 1))))
 
+    (is (= sent-stored (db/get-random-sentence 1)))
+
     (is (= 1 (count (db/get-document-sentences 1))))
 
-    (is (= "LOC" (last (:tags (db/update-sentence!
-                                (assoc sent-stored :tags ["O" "O" "O" "LOC"]))))))
+    (is (= sent-updated (db/update-sentence!
+                          (merge sent-updated {:num_edits 50
+                                               :tokens ["X" "X" "X" "X"]}))))
 
-    (is (= (assoc sent-stored :tags ["O" "O" "O" "LOC"])
-           (db/delete-sentence! 1)))
+    (is (nil? (db/get-random-sentence 1)))
+
+    (is (= sent-updated (db/delete-sentence! 1)))
 
     (is (nil? (db/get-sentence 1)))
 

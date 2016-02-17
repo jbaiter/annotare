@@ -3,6 +3,8 @@
     [clojure.string :as s]
     [annotare.db.queries :as q]))
 
+
+;; Util
 (defn- col->set [col-key row]
   (update row col-key #(set (s/split % #" "))))
 
@@ -18,6 +20,7 @@
 (defn- sent->row [s]
   (reduce (fn [m k] (update-in m [k] (partial s/join " "))) s [:tokens :tags]))
 
+
 ;; Projects
 (defn- verify-project [p]
   (assert (contains? (:tagset p) (:empty_tag p))
@@ -32,6 +35,10 @@
 
 (defn get-project-documents [id]
   (q/get-project-documents {:id id}))
+
+(defn get-random-sentence [project-id]
+  (when-let [row (first (q/get-untagged-sentence {:id project-id}))]
+    (row->sent row)))
 
 (defn create-project! [params]
   (verify-project params)

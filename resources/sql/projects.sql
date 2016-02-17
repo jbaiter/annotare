@@ -17,6 +17,13 @@ SELECT * FROM projects
 -- retrieve all documents for a project
 SELECT * FROM documents WHERE project_id = :id
 
+-- name: get-untagged-sentence
+-- retrieve a random untagged sentence for the project
+SELECT * FROM sentences
+    WHERE document_id IN (SELECT id from documents WHERE project_id = :id)
+          AND num_edits = 0
+    ORDER BY RANDOM() LIMIT 1;
+
 -- name: update-project!
 -- update an existing project record
 UPDATE projects
