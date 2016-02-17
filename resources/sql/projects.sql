@@ -27,7 +27,8 @@ SELECT * FROM sentences
 -- name: update-project!
 -- update an existing project record
 UPDATE projects
-SET name = :name, description = :description
+SET name = :name, description = :description, tagset = :tagset,
+    empty_tag = :empty_tag
 WHERE id = :id
 
 -- name: delete-project!

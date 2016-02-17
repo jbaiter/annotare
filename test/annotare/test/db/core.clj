@@ -21,18 +21,18 @@
                  :document_id 1})
 
 (deftest test-projects
-  (let [project-stored (db/create-project! dummy-project)]
+  (let [project-stored (db/create-project! dummy-project)
+        project-updated (merge project-stored {:name "updated"
+                                               :description "updated"
+                                               :tagset #{"PER" "LOC" "NONE"}
+                                               :empty_tag "NONE"})]
     (is (= (assoc dummy-project :id 1) project-stored))
 
     (is (= project-stored (first (db/get-projects))))
 
-    (is (= "updated"
-           (:description
-             (db/update-project!
-              (assoc project-stored :description "updated")))))
+    (is (= project-updated (db/update-project! project-updated)))
 
-    (is (= (assoc project-stored :description "updated")
-           (db/delete-project! 1)))
+    (is (= project-updated (db/delete-project! 1)))
 
     (is (nil? (db/get-project 1)))
 
@@ -40,7 +40,8 @@
                 (db/create-project! (assoc dummy-project :empty_tag "FOO"))))))
 
 (deftest test-documents
-  (let [doc-stored (db/create-document! dummy-document)]
+  (let [doc-stored (db/create-document! dummy-document)
+        doc-updated (merge doc-stored {:name "foo"})]
     (is (= (assoc dummy-document :id 1) doc-stored))
 
     (is (= doc-stored (first (db/get-documents))))
