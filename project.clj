@@ -58,7 +58,7 @@
   [{:src "resources/scss/screen.scss"
     :output-to "resources/public/css/screen.css"
     :style "nested"
-    :import-path "resources/scss"}]
+    :import-path "resources"}]
 
   :auto
   {"sassc" {:file-pattern #"\.(scss|sass)$" :paths ["resources/scss"]}} 

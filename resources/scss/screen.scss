@@ -1,3 +1,11 @@
+@import 'public/js/node_modules/bulma/bulma/utilities/utilities';
+@import 'public/js/node_modules/bulma/bulma/config/variables';
+@import 'public/js/node_modules/bulma/bulma/config/generated-variables';
+@import 'public/js/node_modules/bulma/bulma/base/base';
+@import 'public/js/node_modules/bulma/bulma/elements/elements';
+@import 'public/js/node_modules/bulma/bulma/components/components';
+@import 'public/js/node_modules/bulma/bulma/layout/layout';
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     height: 100%;
