@@ -9,5 +9,33 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     height: 100%;
-    padding-top: 40px;
+}
+
+canvas {
+    font-size: 14px;
+}
+
+.tag-select {
+    display: inline;
+    margin-right: 2em;
+
+    .token {
+        // Pass pointer-events through to the select
+        pointer-events: none;
+        font-size: 4em;
+    }
+
+    select {
+        background: transparent;
+        margin-top: -38px;
+        padding-top: 53px;
+        padding-right: 0px;
+        padding-bottom: 5px;
+        height: 76px;
+        font-size: 14px;
+        -webkit-appearance: None;
+        -moz-appearance: none;
+        appearance: none;
+        border: 0px;
+    }
 }
