@@ -1,6 +1,7 @@
 (ns annotare.test.db.core
   (:require [annotare.db.core :as db]
             [annotare.db.migrations :as migrations]
+            [clojure.java.io :as io]
             [clojure.test :refer :all]
             [clojure.java.jdbc :as jdbc]
             [config.core :refer [env]]))
@@ -8,7 +9,7 @@
 (use-fixtures
   :each
   (fn [f]
-    (migrations/migrate ["rollback"])
+    (io/delete-file (last (clojure.string/split (:database-url env) #":")))
     (migrations/migrate ["migrate"])
     (f)))
 

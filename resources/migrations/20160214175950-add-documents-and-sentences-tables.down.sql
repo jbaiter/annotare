@@ -1,11 +1,5 @@
 DROP TABLE sentences;
 --;;
-DELETE FROM sqlite_sequence WHERE name='sentences';
---;;
 DROP TABLE documents;
 --;;
-DELETE FROM sqlite_sequence WHERE name='documents';
---;;
 DROP TABLE projects;
---;;
-DELETE FROM sqlite_sequence WHERE name='projects';
