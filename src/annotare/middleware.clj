@@ -2,11 +2,7 @@
   (:require [annotare.layout :refer [*app-context* error-page]]
             [clojure.tools.logging :as log]
             [config.core :refer [env]]
-            [ring.middleware.flash :refer [wrap-flash]]
-            [immutant.web.middleware :refer [wrap-session]]
-            [ring.middleware.webjars :refer [wrap-webjars]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-            [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
             [ring.middleware.format :refer [wrap-restful-format]]
             [annotare.config :refer [defaults]])
   (:import [javax.servlet ServletContext]))
@@ -36,14 +32,6 @@
                      :title "Something very bad has happened!"
                      :message "We've dispatched a team of highly trained gnomes to take care of the problem."})))))
 
-(defn wrap-csrf [handler]
-  (wrap-anti-forgery
-    handler
-    {:error-response
-     (error-page
-       {:status 403
-        :title "Invalid anti-forgery token"})}))
-
 (defn wrap-formats [handler]
   (let [wrapped (wrap-restful-format
                   handler
@@ -56,9 +44,6 @@
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
       wrap-formats
-      wrap-webjars
-      wrap-flash
-      (wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults
         (-> site-defaults
             (assoc-in [:security :anti-forgery] false)
