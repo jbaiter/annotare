@@ -27,7 +27,8 @@
                  [org.clojure/core.async "0.2.374"]
                  [cljs-ajax "0.5.3"]
                  [luminus-immutant "0.1.0"]
-                 [luminus-log4j "0.1.2"]]
+                 [org.clojure/data.xml "0.0.8"]
+                 [org.clojure/data.zip "0.1.1"]]
 
   :min-lein-version "2.0.0"
   :uberjar-name "annotare.jar"
