@@ -2,9 +2,7 @@
   (:require [compojure.core :refer [defroutes routes wrap-routes]]
             [annotare.layout :refer [error-page]]
             [annotare.routes.home :refer [home-routes]]
-            [annotare.routes.project :refer [project-routes]]
-            [annotare.routes.document :refer [document-routes]]
-            [annotare.routes.sentence :refer [sentence-routes]]
+            [annotare.routes.services :refer [service-routes]]
             [annotare.middleware :as middleware]
             [clojure.tools.logging :as log]
             [compojure.route :as route]
@@ -28,9 +26,7 @@
 (def app-routes
   (routes
     home-routes
-    project-routes
-    document-routes
-    sentence-routes
+    service-routes
     (route/not-found
       (:body
         (error-page {:status 404

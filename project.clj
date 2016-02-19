@@ -28,14 +28,16 @@
                  [cljs-ajax "0.5.3"]
                  [luminus-http-kit "0.1.1"]
                  [luminus-log4j "0.1.2"]
+                 [prismatic/schema "1.0.3"]
                  [org.clojure/data.xml "0.0.8"]
-                 [org.clojure/data.zip "0.1.1"]]
+                 [org.clojure/data.zip "0.1.1"]
+                 [metosin/compojure-api "1.0.0"]]
 
   :min-lein-version "2.0.0"
   :uberjar-name "annotare.jar"
   :jvm-opts ["-server"]
   :resource-paths ["resources" "target/cljsbuild"]
-  :source-paths ["src/clj"]
+  :source-paths ["src/clj", "src/cljc"]
 
   :main annotare.core
   :migratus {:store :database}
@@ -64,7 +66,7 @@
   :cljsbuild
   {:builds
    {:app
-    {:source-paths ["src/cljs"]
+    {:source-paths ["src/cljs", "src/cljc"]
      :compiler
      {:output-to "target/cljsbuild/public/js/app.js"
       :output-dir "target/cljsbuild/public/js/out"
