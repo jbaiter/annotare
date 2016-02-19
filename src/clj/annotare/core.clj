@@ -6,6 +6,8 @@
             [config.core :refer [env]])
   (:gen-class))
 
+(def max-body (* 1024 1024 32))
+
 (defn parse-port [port]
   (when port
     (cond
@@ -32,7 +34,8 @@
       (repl/start {:port (parse-port repl-port)}))
     (http/start {:handler app
                  :init    init
-                 :port    port})))
+                 :port    port
+                 :max-body max-body})))
 
 (defn -main [& args]
   (cond

@@ -26,7 +26,8 @@
                  [secretary "1.2.3"]
                  [org.clojure/core.async "0.2.374"]
                  [cljs-ajax "0.5.3"]
-                 [luminus-immutant "0.1.0"]
+                 [luminus-http-kit "0.1.1"]
+                 [luminus-log4j "0.1.2"]
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/data.zip "0.1.1"]]
 
@@ -131,9 +132,11 @@
                   ;;when :nrepl-port is set the application starts the nREPL server on load
                   :env {:dev        true
                         :port       3000
+                        :max-body-size (* 1024 1024 32)
                         :nrepl-port 7000}}
    :project/test {:env {:test       true
                         :port       3001
+                        :max-body-size (* 1024 1024 32)
                         :nrepl-port 7001}}
    :profiles/dev {}
    :profiles/test {}})
