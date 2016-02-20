@@ -26,7 +26,7 @@
           {:on-click #(dispatch [:toggle-nav])}
           [:span] [:span] [:span]]
         [:div.header-right.header-menu
-         {:class (when-not collapsed? "is-active")}
+         {:class (when-not @collapsed? "is-active")}
          [nav-link "#/" "Home" :front active-page]
          [nav-link "#/admin" "Admin" :admin active-page]]]])))
 
