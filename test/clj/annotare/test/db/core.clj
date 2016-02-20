@@ -42,7 +42,8 @@
 (deftest test-documents
   (let [doc-stored (db/create-document! dummy-document)
         doc-updated (merge doc-stored {:name "foo"})]
-    (is (= (assoc dummy-document :id 1) doc-stored))
+    (is (= (merge dummy-document {:id 1 :sentence_count 0 :untagged_count 0})
+           doc-stored))
 
     (is (= doc-stored (first (db/get-documents))))
 

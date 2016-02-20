@@ -13,7 +13,9 @@
 (s/defschema Document
   {(s/optional-key :id) s/Int
    :name s/Str
-   (s/optional-key :project_id) s/Int})
+   (s/optional-key :project_id) s/Int
+   (s/optional-key :sentence_count) s/Int
+   (s/optional-key :untagged_count) s/Int})
 
 (s/defschema Sentence
   {(s/optional-key :id) s/Int

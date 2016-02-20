@@ -15,7 +15,13 @@ SELECT * FROM projects
 
 -- name: get-project-documents
 -- retrieve all documents for a project
-SELECT * FROM documents WHERE project_id = :id
+SELECT id, name, project_id, COALESCE(c1, 0) AS sentence_count, COALESCE(c2, 0) AS untagged_count
+    FROM documents D
+    LEFT JOIN (SELECT document_id, COUNT(*) as c1
+               FROM SENTENCES) AS S1 ON D.id = S1.document_id
+    LEFT JOIN (SELECT document_id, num_edits, COUNT(*) as c2
+               FROM SENTENCES WHERE num_edits = 0) AS S2 ON D.id = S2.document_id
+    WHERE D.project_id = :id
 
 -- name: get-untagged-sentence
 -- retrieve a random untagged sentence for the project
