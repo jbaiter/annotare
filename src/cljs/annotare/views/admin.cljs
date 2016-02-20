@@ -35,7 +35,7 @@
    [:thead>tr
     [:th "Name"]
     [:th "# sentences"]
-    [:th "# tagged"]
+    [:th "# untagged"]
     [:th "Actions"]]
    [:tbody
     ;; TODO: When clicked, display nested table of sentences below

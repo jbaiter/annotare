@@ -15,23 +15,28 @@ canvas {
     font-size: 14px;
 }
 
+.tagging-toolbar {
+    margin-bottom: 3em;
+}
+
 .tag-select {
     display: inline;
-    margin-right: 2em;
 
     .token {
         // Pass pointer-events through to the select
         pointer-events: none;
-        font-size: 4em;
+        font-size: 2em;
+        font-color: blue;
     }
 
     select {
+        //background: lightgray;
         background: transparent;
-        margin-top: -38px;
-        padding-top: 53px;
+        padding-top: 0px;
         padding-right: 0px;
-        padding-bottom: 5px;
-        height: 76px;
+        padding-bottom: 46px;
+        margin-bottom: 10px;
+        height: 64px;
         font-size: 14px;
         -webkit-appearance: None;
         -moz-appearance: none;

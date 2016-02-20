@@ -63,6 +63,8 @@
             (when del-docs  [:span [:strong del-docs] " documents and "])
             (when del-sents [:span [:strong del-sents] " sentences"])
             "."]
+           ; TODO: Add "Yes I am sure" checkbox and make delete button inactive
+           ;       until it is clicked
            [:button.button {:on-click #(dispatch [:toggle-modal])} "Cancel"]
            [:button.button.is-danger {:on-click #(dispatch [:delete object-type object-id])} "Delete"]])]
        [:button.modal-close {:on-click #(dispatch [:toggle-modal])}]])))
