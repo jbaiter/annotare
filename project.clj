@@ -21,13 +21,14 @@
                  [conman "0.2.9"]
                  [org.xerial/sqlite-jdbc "3.8.11.1"]
                  [org.clojure/clojurescript "1.7.228" :scope "provided"]
-                 [reagent "0.5.1"]
+                 [reagent "0.6.0-alpha"]
                  [reagent-utils "0.1.7"]
                  [secretary "1.2.3"]
                  [org.clojure/core.async "0.2.374"]
                  [cljs-ajax "0.5.3"]
                  [luminus-http-kit "0.1.1"]
                  [luminus-log4j "0.1.2"]
+                 [re-frame "0.7.0-alpha"]
                  [prismatic/schema "1.0.3"]
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/data.zip "0.1.1"]
@@ -49,7 +50,7 @@
             [lein-auto "0.1.2"]
             [lein-npm "0.6.1"]]
 
-  :npm {:dependencies [[bulma "0.0.13"]]
+  :npm {:dependencies [[bulma "0.0.14"]]
         :root "resources/public/js"}
 
   :sassc
