@@ -37,7 +37,7 @@
   :uberjar-name "annotare.jar"
   :jvm-opts ["-server"]
   :resource-paths ["resources" "target/cljsbuild"]
-  :source-paths ["src/clj", "src/cljc"]
+  :source-paths ["src/clj", "src/cljc", "test/clj"]
 
   :main annotare.core
   :migratus {:store :database}
