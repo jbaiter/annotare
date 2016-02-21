@@ -20,7 +20,7 @@ canvas {
 }
 
 .tag-select {
-    display: inline;
+    display: inline-block;
 
     .token {
         // Pass pointer-events through to the select
