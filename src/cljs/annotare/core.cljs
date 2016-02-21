@@ -19,7 +19,7 @@
 (defroute "/tag/:project-id" [project-id]
   (let [project-id (js/parseInt project-id)]
     (dispatch [:set-active-project project-id])
-    (dispatch [:fetch-random-sentence])
+    (dispatch [:fetch-random-sentences [:next-sentence]])
     (dispatch [:set-panel :tag])))
 
 (def history
@@ -32,5 +32,6 @@
   []
   (dispatch-sync [:initialise-db])
   (dispatch [:fetch-projects])
+  (dispatch [:fetch-tagsets])
   (reagent/render [annotare-app]
                   (.getElementById js/document "app")))

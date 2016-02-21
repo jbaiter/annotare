@@ -33,14 +33,18 @@
 (defn front-panel []
   (let [projects (subscribe [:projects])]
     (fn []
-      (if (= 1 (count @projects))
-        (secretary/dispatch! (str "/tag/" (-> @projects vals first :id)))
         [:section.hero>div.hero-content>div.container
-          [:h1.title "Hi there!"]
-          [:h2.subtitle "Pick a project to start tagging."]
-          [:ul
-            (for [[idx {:keys [id name]}] (indexed (vals @projects))]
-              ^{:key idx} [:li [:a {:href (str "#/tag/" id)} name]])]]))))
+          (if (= 1 (count @projects))
+            (do
+              (set! (-> js/window .-location .-hash)
+                    (str "#/tag/" (-> @projects vals first :id)))
+              [:h1.title "Start tagging!"])
+            [:div
+              [:h1.title "Hi there!"]
+              [:h2.subtitle "Pick a project to start tagging."]
+              [:ul
+                (for [[idx {:keys [id name]}] (indexed (vals @projects))]
+                  ^{:key idx} [:li [:a {:href (str "#/tag/" id)} name]])]])])))
 
 
 (defn delete-modal [{:keys [object-type object-id]}]

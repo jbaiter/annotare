@@ -7,20 +7,35 @@
 
 (def headers {"Accept" "application/transit+json"})
 (def default-mw [(when ^boolean goog.DEBUG debug)])
+(def min-num-sentences 10)
 
 
 ;; Backend communication
 (register-handler
-  :fetch-random-sentence
+  :fetch-random-sentences
   [default-mw]
-  (fn [app-db _]
+  (fn [app-db [_ & success-events]]
     (let [proj-id (:active-project app-db)]
       (GET
         (str "/api/project/" proj-id "/random-untagged")
         {:headers headers
-         :handler       #(dispatch [:process-sentence %])
+         :params {:num (* 1.5 min-num-sentences)}
+         :handler       #(dispatch [:process-sentences % success-events])
          :error-handler #(dispatch [:bad-response %])}))
-    (assoc app-db :loading? true)))
+    (update app-db :loading? inc)))
+
+(register-handler
+  :next-sentence
+  [default-mw]
+  (fn [app-db _]
+    (let [sent (peek (:sentence-queue app-db))
+          newq (pop (:sentence-queue app-db))
+          cur-cnt (count newq)]
+      (when (and (not (= cur-cnt 0)) (< cur-cnt min-num-sentences))
+        (dispatch [:fetch-random-sentences]))
+      (-> app-db
+          (assoc :active-sentence sent)
+          (assoc :sentence-queue newq)))))
 
 (register-handler
   :submit-sentence
@@ -33,7 +48,7 @@
          :params sent
          :handler       #(dispatch [:submit-sent-complete %])
          :error-handler #(dispatch [:bad-response %])}))
-    (assoc app-db :loading? true)))
+    (update app-db :loading? inc)))
 
 (register-handler
   :fetch-projects
@@ -43,7 +58,7 @@
          {:headers headers
           :handler        #(dispatch [:process-projects %1])
           :error-handler  #(dispatch [:bad-response %1])})
-    (assoc app-db :loading? true)))
+    (update app-db :loading? inc)))
 
 (register-handler
   :fetch-project-documents
@@ -54,24 +69,35 @@
            {:headers headers
             :handler        #(dispatch [:process-documents %1])
             :error-handler  #(dispatch [:bad-response %1])}))
-    (assoc app-db :loading? true)))
+    (update app-db :loading? inc)))
+
+(register-handler
+  :fetch-tagsets
+  default-mw
+  (fn [app-db _]
+    (GET "/api/tagset"
+         {:headers headers
+          :handler        #(dispatch [:process-tagsets %])
+          :error-handler  #(dispatch [:bad-response %])})
+    (update app-db :loading? inc)))
 
 ;; Backend response handlers
 (register-handler
-  :process-sentence
+  :process-sentences
   default-mw
-  (fn [app-db [_ sentence]]
+  (fn [app-db [_ sentences success-events]]
+    (doseq [ev success-events] (dispatch ev))
     (-> app-db
-        (assoc :active-sentence sentence)
-        (assoc :loading? false))))
+        (update :loading? dec)
+        (update :sentence-queue #(apply (partial conj %) sentences)))))
 
 (register-handler
   :process-projects
   default-mw
   (fn [app-db [_ projects]]
     (-> app-db
-        (assoc :loading? false)
-        (assoc :projects (reduce #(assoc %1 (:id %2) %2) {} projects)))))
+        (assoc :projects (reduce #(assoc %1 (:id %2) %2) {} projects))
+        (update :loading? dec))))
 
 (register-handler
   :process-documents
@@ -80,21 +106,37 @@
     (let [doc-map (reduce #(assoc %1 (:id %2) %2) {} docs)]
       (-> app-db
           (update :documents #(merge % doc-map))
-          (assoc :loading? false)))))
+          (update :loading? dec)))))
+
+(register-handler
+  :process-tagsets
+  default-mw
+  (fn [app-db [_ tagsets]]
+    (let [ts-map (reduce #(assoc %1 (:id %2) %2) {} tagsets)]
+      (-> app-db
+          (update :tagsets #(merge % ts-map))
+          (update :loading? dec)))))
 
 (register-handler
   :submit-sent-complete
   default-mw
   (fn [app-db [_ _]]
-    (dispatch [:fetch-random-sentence])
-    (assoc app-db :loading? false)))
+    (dispatch [:next-sentence])
+    (update app-db :loading? dec)))
 
 (register-handler
   :bad-response
   default-mw
   (fn [app-db [_ error]]
     (.error js/console (str error))
-    (assoc app-db :error {:message "There was a problem while communicating with the server."})))
+    (assoc app-db :error {:message "There was a problem while communicating with the server."
+                          :cause   error})))
+
+(register-handler
+  :clear-sentence-queue
+  default-mw
+  (fn [app-db _]
+    (assoc app-db :sentence-queue cljs.core/PersistentQueue.EMPTY)))
 
 ;; UI handlers
 (register-handler
@@ -112,10 +154,12 @@
 
 (register-handler
   :set-active-project
-  [(path :active-project) default-mw]
-  (fn  [old-id [_ new-id]]
-    (dispatch [:fetch-project-documents])
-    new-id))
+  [default-mw]
+  (fn  [app-db [_ new-id]]
+    (when (not (= (:active-project app-db) new-id))
+      (dispatch [:clear-sentence-queue])
+      (dispatch [:fetch-project-documents]))
+    (assoc app-db :active-project new-id)))
 
 (register-handler
   :toggle-form

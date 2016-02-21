@@ -11,12 +11,12 @@
   "Check if we're running on Firefox"
   (exists? js/InstallTrigger))
 
-(defn make-tag-colors [tagset empty-tag]
-  (let [tagset (disj tagset empty-tag)
+(defn make-tag-colors [{:keys [empty_tag tags]}]
+  (let [tagset (disj tags empty_tag)
         num-tags (count tagset)
         hue-step (/ 360 num-tags)
         palette (map #(goog.string/format "hsl(%d, 100%%, 40%%)" %) (range 0 360 hue-step))]
-    (into {empty-tag "hsl(180, 0%, 50%)" } (map vector tagset palette))))
+    (into {empty_tag "hsl(180, 0%, 50%)" } (map vector tagset palette))))
 
 (defn get-text-width [text font font-size]
   "Utility function to determine the width of a given string when rendered
@@ -53,7 +53,7 @@
   [:div.tagging-toolbar.columns
    [:div.column.is-2.is-offset-3
     [:button.button
-      {:on-click #(dispatch [:fetch-random-sentence])}
+      {:on-click #(dispatch [:next-sentence])}
       "Skip"]]
    [:div.column.is-2.is-offset-2
     [:button.button.is-success
@@ -67,10 +67,10 @@
         project (subscribe [:active-project])]
     (fn []
       (let [{:keys [tagset empty_tag id]} @project
-            tag-colors (make-tag-colors tagset empty_tag)]
+            tag-colors (make-tag-colors tagset)]
         [:section.hero.is-medium
          [:div.hero-content>div.container
           (doall (for [[idx [tok tag]] (indexed (map vector (:tokens @sentence) (:tags @sentence)))]
-                    ^{:key idx} [tagging-token idx tok tag tagset (get tag-colors tag)]))
+                    ^{:key idx} [tagging-token idx tok tag (:tags tagset) (get tag-colors tag)]))
           [tagging-toolbar id]]]))))
 
