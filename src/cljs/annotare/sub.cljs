@@ -2,9 +2,6 @@
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :refer [dispatch register-sub subscribe]]))
 
-(defn debug-prn [v]
-  (.log js/console (with-out-str (cljs.pprint/pprint v))))
-
 (defn materialize-project [docs proj]
   "Retrieve the project and its documents from the db"
   (assoc proj :documents

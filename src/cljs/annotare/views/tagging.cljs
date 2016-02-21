@@ -1,6 +1,5 @@
 (ns annotare.views.tagging
   (:require [reagent.core :as reagent :refer [atom]]
-            [cljs.pprint :refer [pprint]]
             [goog.string.format]
             [re-frame.core :refer [subscribe dispatch]]
             [annotare.util :refer [indexed]]))
@@ -37,7 +36,7 @@
         ;; FIXME: We have to work around a bug in Firefox, where the `text-indent`
         ;; value on `select` elements is doubled (http://stackoverflow.com/q/28108434)
         tag-indent (/ (- select-width tag-width)
-                      (if (is_firefox?) 4 2))]
+                      (if (is-firefox?) 4 2))]
     [:div.tag-select {:style {:margin-right (str max-tag-width "px")}}
       [:select {:style {:width (str select-width "px")
                         :text-indent (str tag-indent "px")
@@ -69,7 +68,6 @@
     (fn []
       (let [{:keys [tagset empty_tag id]} @project
             tag-colors (make-tag-colors tagset empty_tag)]
-        (.log js/console (with-out-str (pprint tag-colors)))
         [:section.hero.is-medium
          [:div.hero-content>div.container
           (doall (for [[idx [tok tag]] (indexed (map vector (:tokens @sentence) (:tags @sentence)))]

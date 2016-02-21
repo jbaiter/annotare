@@ -38,7 +38,8 @@
   :uberjar-name "annotare.jar"
   :jvm-opts ["-server"]
   :resource-paths ["resources" "target/cljsbuild"]
-  :source-paths ["src/clj", "src/cljc", "test/clj"]
+  :source-paths ["src/clj", "src/cljc"]
+  :test-paths ["test/clj"]
 
   :main annotare.core
   :migratus {:store :database}
@@ -85,6 +86,7 @@
                  :compiler
                  {:optimizations :advanced
                   :pretty-print false
+                  :closure-defines {"goog.DEBUG" false}
                   :closure-warnings
                   {:externs-validation :off :non-standard-jsdoc :off}}}}} 
 

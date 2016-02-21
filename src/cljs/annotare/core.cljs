@@ -4,7 +4,6 @@
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [dispatch dispatch-sync]]
             [secretary.core :as secretary]
-            [devtools.core :as devtools]
             [annotare.handlers]
             [annotare.subs]
             [annotare.views.app :refer [annotare-app]])
@@ -12,8 +11,6 @@
            [goog.history EventType]))
 
 (enable-console-print!)
-(devtools/enable-feature! :sanity-hints  :dirac)
-(devtools/install!)
 
 (defroute "/" []
   (dispatch [:set-panel :front]))
