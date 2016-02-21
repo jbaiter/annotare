@@ -49,13 +49,17 @@
                             :color color}}
        token]]))
 
-(defn tagging-toolbar [project-id]
+(defn tagging-toolbar [project-id tagset-id]
   [:div.tagging-toolbar.columns
    [:div.column.is-2.is-offset-3
     [:button.button
       {:on-click #(dispatch [:next-sentence])}
       "Skip"]]
-   [:div.column.is-2.is-offset-2
+   [:div.column.is-2.is-offset-1
+    [:button.button.is-info
+     {:on-click #(dispatch [:toggle-modal :tag-help :tagset tagset-id])}
+     "Tagging guidelines"]]
+   [:div.column.is-2.is-offset-1
     [:button.button.is-success
       {:on-click (fn []
                    (.scroll js/window 0 0)
@@ -72,5 +76,5 @@
          [:div.hero-content>div.container
           (doall (for [[idx [tok tag]] (indexed (map vector (:tokens @sentence) (:tags @sentence)))]
                     ^{:key idx} [tagging-token idx tok tag (:tags tagset) (get tag-colors tag)]))
-          [tagging-toolbar id]]]))))
+          [tagging-toolbar id (:id tagset)]]]))))
 

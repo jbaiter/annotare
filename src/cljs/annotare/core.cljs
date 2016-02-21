@@ -18,9 +18,7 @@
   (dispatch [:set-panel :admin]))
 (defroute "/tag/:project-id" [project-id]
   (let [project-id (js/parseInt project-id)]
-    (dispatch [:set-active-project project-id])
-    (dispatch [:fetch-random-sentences [:next-sentence]])
-    (dispatch [:set-panel :tag])))
+    (dispatch [:set-panel :tag project-id])))
 
 (def history
   (doto (History.)

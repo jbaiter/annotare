@@ -35,6 +35,13 @@
       (reaction (get @docs id)))))
 
 (register-sub
+  :tagset
+  (fn [db [_ id]]
+    (reaction
+      (let [tagsets (:tagsets @db)]
+        (get tagsets id)))))
+
+(register-sub
   :active-project
   (fn [db _]
     (let [docs (subscribe [:documents])

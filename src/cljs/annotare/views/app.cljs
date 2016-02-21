@@ -4,7 +4,8 @@
             [secretary.core :as secretary]
             [annotare.util :refer [indexed]]
             [annotare.views.admin :refer [admin-panel]]
-            [annotare.views.tagging :refer [tagging-panel]]))
+            [annotare.views.tagging :refer [tagging-panel]]
+            [markdown.core :refer [md->html]]))
 
 (defn nav-link [uri title page-key active-page]
   "Entry in the navigation bar for parts of the application"
@@ -73,6 +74,17 @@
            [:button.button.is-danger {:on-click #(dispatch [:delete object-type object-id])} "Delete"]])]
        [:button.modal-close {:on-click #(dispatch [:toggle-modal])}]])))
 
+(defn tagging-help-modal [{:keys [object-id]}]
+  (let [tagset (subscribe [:tagset object-id])]
+    (fn []
+      [:div.modal.is-active
+       [:div.modal-background]
+       (let [{:keys [name documentation]} @tagset]
+        [:div.modal-container>div.modal-content>div.modal-box
+          [:h1.title "Guidelines for tagset \"" name "\""]
+          [:div {:dangerouslySetInnerHTML {:__html (md->html documentation)}}]
+          [:button.modal-close {:on-click #(dispatch [:toggle-modal])}]])])))
+
 (defn annotare-app []
   (let [panel (subscribe [:active-panel])
         modal-info (subscribe [:active-modal])]
@@ -81,6 +93,7 @@
        (when-let [mtype (:type @modal-info)]
         (case mtype
           :delete [delete-modal (dissoc @modal-info :type)]
+          :tag-help [tagging-help-modal (dissoc @modal-info :type)]
           nil))
        [navbar @panel]
        (case @panel

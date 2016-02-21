@@ -32,7 +32,8 @@
                  [prismatic/schema "1.0.3"]
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/data.zip "0.1.1"]
-                 [metosin/compojure-api "1.0.0"]]
+                 [metosin/compojure-api "1.0.0"]
+                 [markdown-clj "0.9.85"]]
 
   :min-lein-version "2.0.0"
   :uberjar-name "annotare.jar"

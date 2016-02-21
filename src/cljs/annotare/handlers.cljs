@@ -142,7 +142,14 @@
 (register-handler
   :set-panel
   default-mw
-  (fn [app-db [_ new-panel]]
+  (fn [app-db [_ new-panel & args]]
+    (case new-panel
+      :tag (let [[proj-id] args]
+             (dispatch [:set-active-project proj-id])
+             (when (not (= (:active-project app-db) proj-id))
+               (dispatch [:clear-sentence-queue])
+               (dispatch [:fetch-random-sentences [:next-sentence]])))
+      nil)
     (-> app-db
         (assoc :active-panel new-panel))))
 
@@ -157,7 +164,6 @@
   [default-mw]
   (fn  [app-db [_ new-id]]
     (when (not (= (:active-project app-db) new-id))
-      (dispatch [:clear-sentence-queue])
       (dispatch [:fetch-project-documents]))
     (assoc app-db :active-project new-id)))
 
