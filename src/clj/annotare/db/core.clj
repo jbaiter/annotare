@@ -83,7 +83,7 @@
 (defn update-tagset! [{:keys [id] :as params}]
   (verify-tagset params)
   (q/update-tagset! (set->col :tags params))
-  (get-project id))
+  (get-tagset id))
 
 
 ;; Documents
