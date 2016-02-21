@@ -6,7 +6,7 @@
             [schema.core :as s]
             [annotare.db.core :as db]
             [annotare.parsers.core :refer [parsers]]
-            [annotare.schemas :refer [Project Document Sentence]]))
+            [annotare.schemas :refer [Project Document Sentence Tagset]]))
 
 (defapi service-routes
   {:swagger {:ui "/swagger-ui"
@@ -36,9 +36,11 @@
           (ok (db/get-project id)))
 
         (GET "/random-untagged" []
-          :return       Sentence
-          :summary      "Retrieve a random, untagged sentence from the project"
-          (ok (db/get-random-sentence id)))
+          :return       [Sentence]
+          :query-params [num :- Long]
+          :summary      "Retrieve a number of random, untagged sentence from
+                         the project"
+          (ok (db/get-random-sentence id num)))
 
         (PUT "/" []
           :return       Project
@@ -61,6 +63,36 @@
           :return       [Document]
           :summary      "Retrieve all documents in a project"
           (ok (db/get-project-documents id)))))
+    (context "/tagset" []
+      (GET "/" []
+        :return   [Tagset]
+        :summary  "Retrieve all tagsets"
+        (ok (db/get-tagsets)))
+
+      (POST "/" []
+        :return   Tagset
+        :body     [tagset Tagset]
+        :summary  "Create a new tagset"
+        (ok  (db/create-tagset! tagset)))
+      (context "/:id" []
+        :path-params [id :- Long]
+
+        (GET "/" []
+          :return   Tagset
+          :summary  "Retrieve a specific tagset"
+          (ok (db/get-tagset id)))
+
+        (PUT "/" []
+          :return   Tagset
+          :body     [tagset Tagset]
+          :summary  "Update a tagset"
+          (ok (db/update-tagset! (assoc tagset :id id))))
+
+        (DELETE "/" []
+          :return   Tagset
+          :summary  "Delete a tagset"
+          (ok (db/delete-tagset! id)))))
+
     (context "/document/:id" []
       :path-params  [id :- Long]
 

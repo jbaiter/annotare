@@ -22,27 +22,28 @@
 
 
 ;; Projects
-(defn- verify-project [p]
-  (assert (contains? (:tagset p) (:empty_tag p))
-          "The chosen :empty_tag is not in the :tagset!"))
-
 (defn get-project [id]
   (when-let [project (first (q/get-project {:id id}))]
-    (col->set :tagset project)))
+    project))
 
-(defn get-projects []
-  (map (partial col->set :tagset) (q/get-projects)))
+(def get-projects q/get-projects)
 
 (defn get-project-documents [id]
   (q/get-project-documents {:id id}))
 
-(defn get-random-sentence [project-id]
-  (when-let [row (first (q/get-untagged-sentence {:id project-id}))]
-    (row->sent row)))
+(defn get-random-sentence
+  ([project-id]
+   (first (get-random-sentence project-id 1)))
+  ([project-id number]
+   (when-let [rows (q/get-untagged-sentences {:id project-id
+                                              :limit number})]
+     (map row->sent rows))))
 
 (defn create-project! [params]
-  (verify-project params)
-  (get-project (get-insert-id (q/create-project<! (set->col :tagset params)))))
+  (-> params
+      q/create-project<!
+      get-insert-id
+      get-project))
 
 (defn delete-project! [id]
   (let [deleted (get-project id)]
@@ -50,8 +51,38 @@
     deleted))
 
 (defn update-project! [{:keys [id] :as params}]
-  (verify-project params)
-  (q/update-project! (set->col :tagset params))
+  (q/update-project! params)
+  (get-project id))
+
+
+;; Tagsets
+(defn- verify-tagset [t]
+  (assert (contains? (:tags t) (:empty_tag t))
+          "The chosen :empty_tag is not in the :tags!"))
+
+(defn get-tagset [id]
+  (when-let [tagset (first (q/get-tagset {:id id}))]
+    (col->set :tags tagset)))
+
+(defn get-tagsets []
+  (map (partial col->set :tags) (q/get-tagsets)))
+
+(defn create-tagset! [params]
+  (verify-tagset params)
+  (->> params
+       (set->col :tags)
+       q/create-tagset<!
+       get-insert-id
+       get-project))
+
+(defn delete-tagset! [id]
+  (let [deleted (get-tagset id)]
+    (q/delete-tagset! {:id id})
+    deleted))
+
+(defn update-tagset! [{:keys [id] :as params}]
+  (verify-tagset params)
+  (q/update-tagset! (set->col :tags params))
   (get-project id))
 
 
@@ -77,16 +108,11 @@
   (get-document id))
 
 ;; Sentences
-(defn get-sentence-tagset [s]
-  (-> s
-      :document_id
-      get-document
-      :project_id
-      get-project
-      :tagset))
+(defn get-sentence-tagset [id]
+  (col->set :tags (first (q/get-sentence-tagset {:id id}))))
 
 (defn- verify-sentence [s]
-  (let [tagset (get-sentence-tagset s)
+  (let [tagset (-> s :id get-sentence-tagset :tags)
         extra-tags (clojure.set/difference (set (:tags s)) tagset)]
     (assert (= (count (:tags s)) (count (:tokens s)))
             ":tags and :tokens must be of equal length!")

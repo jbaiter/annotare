@@ -7,8 +7,7 @@
   {(s/optional-key :id) s/Int
    :name s/Str
    :description s/Str
-   :tagset #{s/Str}
-   :empty_tag s/Str})  ;; TODO: Verify that this is a value in :tagset
+   :tagset_id s/Int})
 
 (s/defschema Document
   {(s/optional-key :id) s/Int
@@ -23,3 +22,10 @@
    :tags [s/Str]
    (s/optional-key :document_id) s/Int
    (s/optional-key :num_edits) s/Int})
+
+(s/defschema Tagset
+  {(s/optional-key :id) s/Int
+   :tags #{s/Str}
+   :empty_tag s/Str   ;; TODO: Verify that this is a value in :tags
+   :name s/Str
+   :documentation (s/maybe s/Str)})

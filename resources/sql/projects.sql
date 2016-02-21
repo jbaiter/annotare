@@ -1,8 +1,8 @@
 -- name: create-project<!
 -- creates a new project record
 INSERT INTO projects
-(name, tagset, empty_tag, description)
-VALUES (:name, :tagset, :empty_tag, :description)
+(name, description, tagset_id)
+VALUES (:name, :description, :tagset_id)
 
 -- name: get-project
 -- retrieve a project given the id.
@@ -23,18 +23,17 @@ SELECT id, name, project_id, COALESCE(c1, 0) AS sentence_count, COALESCE(c2, 0) 
                FROM SENTENCES WHERE num_edits = 0) AS S2 ON D.id = S2.document_id
     WHERE D.project_id = :id
 
--- name: get-untagged-sentence
--- retrieve a random untagged sentence for the project
+-- name: get-untagged-sentences
+-- retrieve random untagged sentences for the project
 SELECT * FROM sentences
     WHERE document_id IN (SELECT id from documents WHERE project_id = :id)
           AND num_edits = 0
-    ORDER BY RANDOM() LIMIT 1;
+    ORDER BY RANDOM() LIMIT :limit;
 
 -- name: update-project!
 -- update an existing project record
 UPDATE projects
-SET name = :name, description = :description, tagset = :tagset,
-    empty_tag = :empty_tag
+SET name = :name, description = :description
 WHERE id = :id
 
 -- name: delete-project!

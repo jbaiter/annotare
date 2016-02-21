@@ -13,6 +13,13 @@ WHERE id = :id
 -- retrieve all sentences.
 SELECT * FROM sentences
 
+-- name: get-sentence-tagset
+-- retrieve the tagset for a sentence
+SELECT t.id, t.tags, t.empty_tag, t.documentation FROM tagsets t
+    JOIN projects AS p ON p.tagset_id = t.id
+    JOIN documents AS d ON d.project_id = p.id
+    JOIN sentences AS s ON s.document_id = d.id AND s.id = :id
+
 -- name: update-sentence!
 -- update an existing sentence record
 UPDATE sentences
