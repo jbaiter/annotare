@@ -40,5 +40,4 @@
       (let [root (parse rdr)
             tokens (get-tokens root)
             sent-lens (get-sentence-lens root)]
-        (part-seq sent-lens tokens)
         (part-seq sent-lens tokens)))))

@@ -111,8 +111,16 @@
 (defn get-sentence-tagset [id]
   (col->set :tags (first (q/get-sentence-tagset {:id id}))))
 
+(defn get-document-tagset [id]
+  (when-let [tagset (q/get-document-tagset {:id id})]
+    (col->set :tags tagset)))
+
+(defn get-project-tagset [id]
+  (when-let [tagset (q/get-project-tagset {:id id})]
+    (col->set :tags tagset)))
+
 (defn- verify-sentence [s]
-  (let [tagset (-> s :id get-sentence-tagset :tags)
+  (let [tagset (-> s :document_id get-document-tagset :tags)
         extra-tags (clojure.set/difference (set (:tags s)) tagset)]
     (assert (= (count (:tags s)) (count (:tokens s)))
             ":tags and :tokens must be of equal length!")

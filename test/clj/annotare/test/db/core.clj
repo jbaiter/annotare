@@ -13,19 +13,36 @@
     (migrations/migrate ["migrate"])
     (f)))
 
-(def dummy-project {:name "test" :tagset #{"PER" "LOC" "O"}
-                    :empty_tag "O" :description "test"})
+(def dummy-tagset  {:name "testset" :tags #{"PER" "LOC" "O"} :empty_tag "O"
+                    :documentation "testest"})
+(def dummy-project {:name "test" :description "test" :tagset_id 1})
 (def dummy-document {:name "test-doc" :project_id 1})
 (def dummy-sent {:tokens ["I" "live" "in" "Berlin"]
                  :tags   ["O" "O"    "O"  "O"]
                  :document_id 1})
 
+(deftest test-tagsets
+  (let [tagset-stored (db/create-tagset! dummy-tagset)
+        tagset-updated (merge tagset-stored {:name "öpdäited"
+                                             :tags #{"O" "PER" "LOC" "ORG"}})]
+
+    (is (= (assoc dummy-tagset :id 1) tagset-stored))
+
+    (is (= tagset-stored (db/get-tagset 1)))
+
+    (is (= tagset-stored (first (db/get-tagset 1))))
+
+    (is (= tagset-updated (db/update-tagset! tagset-updated)))
+
+    (is (= tagset-updated (db/delete-tagset! 1)))
+
+    (is (nil? (db/get-project 1)))))
+
+
 (deftest test-projects
   (let [project-stored (db/create-project! dummy-project)
         project-updated (merge project-stored {:name "updated"
-                                               :description "updated"
-                                               :tagset #{"PER" "LOC" "NONE"}
-                                               :empty_tag "NONE"})]
+                                               :description "updated"})]
     (is (= (assoc dummy-project :id 1) project-stored))
 
     (is (= project-stored (first (db/get-projects))))
@@ -34,10 +51,7 @@
 
     (is (= project-updated (db/delete-project! 1)))
 
-    (is (nil? (db/get-project 1)))
-
-    (is (thrown? AssertionError
-                (db/create-project! (assoc dummy-project :empty_tag "FOO"))))))
+    (is (nil? (db/get-project 1)))))
 
 (deftest test-documents
   (let [doc-stored (db/create-document! dummy-document)
@@ -58,6 +72,7 @@
     (is (nil? (db/get-document 1)))))
 
 (deftest test-sentences
+  (db/create-tagset! dummy-tagset)
   (db/create-project! dummy-project)
   (db/create-document! dummy-document)
   (let [sent-stored (db/create-sentence! dummy-sent)
