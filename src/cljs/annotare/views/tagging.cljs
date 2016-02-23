@@ -25,7 +25,7 @@
     (set! (.-font ctx) (str font-size " " font))
     (.-width (.measureText ctx text))))
 
-(defn tagging-token [token-idx token current-tag tag-set color]
+(defn tagging-token [token-idx token current-tag tag-set color empty-tag]
   "A single token that is to be tagged"
   (let [extra-space 6
         text-width (get-text-width token "Helvetica Neue" "28px")
@@ -44,7 +44,11 @@
                 :value current-tag
                 :on-change #(dispatch [:update-tag token-idx (-> % .-target .-value)])}
         (for [[idx tag] (indexed tag-set)]
-          ^{:key idx} [:option {:value tag} tag])]
+          ^{:key idx} [:option {:value tag}
+                       (if (and (= empty-tag current-tag)
+                                (= empty-tag tag))
+                         " "
+                         tag)])]
       [:span.token {:style {:margin-left (str "-" tok-margin "px")
                             :color color}}
        token]]))
@@ -70,11 +74,11 @@
   (let [sentence (subscribe [:active-sentence])
         project (subscribe [:active-project])]
     (fn []
-      (let [{:keys [tagset empty_tag id]} @project
+      (let [{:keys [tagset id]} @project
             tag-colors (make-tag-colors tagset)]
         [:section.hero.is-medium
          [:div.hero-content>div.container
           (doall (for [[idx [tok tag]] (indexed (map vector (:tokens @sentence) (:tags @sentence)))]
-                    ^{:key idx} [tagging-token idx tok tag (:tags tagset) (get tag-colors tag)]))
+                    ^{:key idx} [tagging-token idx tok tag (:tags tagset) (get tag-colors tag) (:empty_tag tagset)]))
           [tagging-toolbar id (:id tagset)]]]))))
 
