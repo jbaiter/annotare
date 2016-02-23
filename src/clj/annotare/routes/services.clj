@@ -119,27 +119,23 @@
         (ok (db/create-sentence! (assoc sent :document_id id))))
 
       (POST "/sentences/import/:fmt" []
-        :return       [Sentence]
+        :return       s/Int
         :path-params  [fmt :- (s/enum :txt :tcf)]
         :multipart-params [file :- TempFileUpload]
         :middleware [wrap-multipart-params]
         :summary      "Upload a file and import all sentences contained in it
                         into the document"
-        (let [empty-tag  (-> id
-                              db/get-document
-                              :project_id
-                              db/get-project
-                              :empty_tag)
+        (let [{:keys [empty_tag]} (db/get-document-tagset id)
               parser (fmt parsers)]
           (ok (->> file
                     :tempfile
                     parser
+                    (filter not-empty)
                     (map (fn [tokens]
-                          (db/create-sentence!
                             {:tokens tokens
-                              :tags (vec (repeat (count tokens) empty-tag))
-                              :document_id id})))
-                    vec))))
+                             :tags (vec (repeat (count tokens) empty_tag))
+                             :document_id id}))
+                    db/create-sentences!))))
 
       (GET "/sentences" []
         :return       [Document]

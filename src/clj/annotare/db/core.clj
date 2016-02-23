@@ -1,6 +1,7 @@
 (ns annotare.db.core
   (:require
     [clojure.string :as s]
+    [clojure.java.jdbc :as jdbc]
     [annotare.db.queries :as q]))
 
 
@@ -142,6 +143,14 @@
       q/create-sentence<!
       get-insert-id
       get-sentence))
+
+(defn create-sentences! [sentences]
+  (doseq [sent sentences]
+    (verify-sentence sent))
+  (->> sentences
+       (map sent->row)
+       (apply (partial jdbc/insert! q/conn :sentences [:tokens :tags :document_id]))
+       (reduce +)))
 
 (defn delete-sentence! [id]
   (let [deleted (get-sentence id)]
