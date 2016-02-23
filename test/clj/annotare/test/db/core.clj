@@ -30,7 +30,7 @@
 
     (is (= tagset-stored (db/get-tagset 1)))
 
-    (is (= tagset-stored (first (db/get-tagset 1))))
+    (is (= tagset-stored (first (db/get-tagsets))))
 
     (is (= tagset-updated (db/update-tagset! tagset-updated)))
 

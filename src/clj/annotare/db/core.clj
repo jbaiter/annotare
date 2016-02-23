@@ -74,7 +74,7 @@
        (set->col :tags)
        q/create-tagset<!
        get-insert-id
-       get-project))
+       get-tagset))
 
 (defn delete-tagset! [id]
   (let [deleted (get-tagset id)]
@@ -110,14 +110,15 @@
 
 ;; Sentences
 (defn get-sentence-tagset [id]
-  (col->set :tags (first (q/get-sentence-tagset {:id id}))))
+  (when-let [tagset (first (q/get-sentence-tagset {:id id}))]
+    (col->set :tags tagset)))
 
 (defn get-document-tagset [id]
-  (when-let [tagset (q/get-document-tagset {:id id})]
+  (when-let [tagset (first (q/get-document-tagset {:id id}))]
     (col->set :tags tagset)))
 
 (defn get-project-tagset [id]
-  (when-let [tagset (q/get-project-tagset {:id id})]
+  (when-let [tagset (first (q/get-project-tagset {:id id}))]
     (col->set :tags tagset)))
 
 (defn- verify-sentence [s]

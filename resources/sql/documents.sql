@@ -27,8 +27,8 @@ SELECT id, name, project_id, COALESCE(c1, 0) AS sentence_count, COALESCE(c2, 0) 
 -- retrieve all sentences for a document
 SELECT * FROM sentences WHERE document_id = :id
 
--- :name get-project-documents
--- :doc retrieve all documents for a project
+-- name: get-project-documents
+-- retrieve all documents for a project
 SELECT id, name, project_id, COALESCE(c1, 0) AS sentence_count, COALESCE(c2, 0) AS untagged_count
     FROM documents D
     LEFT JOIN (SELECT document_id, COUNT(*) as c1
