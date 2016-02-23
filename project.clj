@@ -86,7 +86,9 @@
                 {:source-paths ["env/prod/cljs"]
                  :compiler
                  {:optimizations :advanced
-                  :pretty-print false
+                  :pretty-print true
+                  :pseudo-names true
+                  :source-map "target/cljsbuild/public/js/app.js.map"
                   :closure-defines {"goog.DEBUG" false}
                   :closure-warnings
                   {:externs-validation :off :non-standard-jsdoc :off}}}}} 
