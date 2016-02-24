@@ -5,49 +5,56 @@
 @import 'public/js/node_modules/bulma/bulma/elements/elements';
 @import 'public/js/node_modules/bulma/bulma/components/components';
 @import 'public/js/node_modules/bulma/bulma/layout/layout';
+@import 'public/js/node_modules/bulma/bulma/layout/layout';
+@import 'public/js/node_modules/spinners/stylesheets/_spinners';
 
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    height: 100%;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  height: 100%;
 }
 
 canvas {
-    font-size: 14px;
+  font-size: 14px;
+}
+
+.loading-spinner {
+  @include spinner(3em, 2s);
+  margin-bottom: 1.5em;
 }
 
 .tagging-toolbar {
-    margin-bottom: 3em;
+  margin-bottom: 3em;
 }
 
 .tag-select {
-    display: inline-block;
+  display: inline-block;
 
-    .token {
-        // Pass pointer-events through to the select
-        pointer-events: none;
-        font-size: 2em;
-        font-color: blue;
-    }
+  .token {
+    // Pass pointer-events through to the select
+    pointer-events: none;
+    font-size: 2em;
+    font-color: blue;
+  }
 
-    select {
-        //background: lightgray;
-        background: transparent;
-        padding-top: 0px;
-        padding-right: 0px;
-        padding-bottom: 46px;
-        margin-bottom: 10px;
-        height: 64px;
-        font-size: 14px;
-        -webkit-appearance: None;
-        -moz-appearance: none;
-        appearance: none;
-        border: 0px;
-    }
+  select {
+    //background: lightgray;
+    background: transparent;
+    padding-top: 0px;
+    padding-right: 0px;
+    padding-bottom: 46px;
+    margin-bottom: 10px;
+    height: 64px;
+    font-size: 14px;
+    -webkit-appearance: None;
+    -moz-appearance: none;
+    appearance: none;
+    border: 0px;
+  }
 }
 
 .modal-box {
-    background: white;
-    border-radius: 5px;
-    box-shadow: 0 2 px 3px rgba(0,0,0,0.1), 0 0 0  1px rgba(0,0,0,0.1);
-    padding: 40px;
+  background: white;
+  border-radius: 5px;
+  box-shadow: 0 2 px 3px rgba(0,0,0,0.1), 0 0 0  1px rgba(0,0,0,0.1);
+  padding: 40px;
 }

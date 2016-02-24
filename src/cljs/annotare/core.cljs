@@ -1,6 +1,6 @@
 (ns annotare.core
   (:require-macros [secretary.core :refer [defroute]])
-  (:require [goog.events :as events]
+  (:require [pushy.core :as pushy]
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [dispatch dispatch-sync]]
             [secretary.core :as secretary]
@@ -11,6 +11,7 @@
            [goog.history EventType]))
 
 (enable-console-print!)
+(secretary/set-config! :prefix "/")
 
 (defroute "/" []
   (dispatch [:set-panel :front]))
@@ -21,13 +22,12 @@
     (dispatch [:set-panel :tag project-id])))
 
 (def history
-  (doto (History.)
-    (events/listen EventType.NAVIGATE
-                   (fn [event] (secretary/dispatch! (.-token event))))
-    (.setEnabled true)))
+  (pushy/pushy secretary/dispatch!
+               (fn [x] (when (secretary/locate-route x) x))))
 
 (defn ^:export main
   []
+  (pushy/start! history)
   (dispatch-sync [:initialise-db])
   (dispatch [:fetch-projects])
   (dispatch [:fetch-tagsets])

@@ -4,8 +4,6 @@
   :url "http://github.com/jbaiter/annotare"
 
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [selmer "1.0.0"]  ;; TODO: Remove
-                 [markdown-clj "0.9.85"]  ;; TODO: Remove
                  [luminus/config "0.5"]
                  [ring-middleware-format "0.7.0"]
                  [metosin/ring-http-response "0.6.5"]
@@ -33,7 +31,8 @@
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/data.zip "0.1.1"]
                  [metosin/compojure-api "1.0.0"]
-                 [markdown-clj "0.9.85"]]
+                 [markdown-clj "0.9.85"]
+                 [kibu/pushy "0.3.6"]]
 
   :min-lein-version "2.0.0"
   :uberjar-name "annotare.jar"
@@ -52,7 +51,8 @@
             [lein-auto "0.1.2"]
             [lein-npm "0.6.1"]]
 
-  :npm {:dependencies [[bulma "0.0.14"]]
+  :npm {:dependencies [[bulma "0.0.14"]
+                       [spinners "1.2.2"]]
         :root "resources/public/js"}
 
   :sassc

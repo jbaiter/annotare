@@ -10,15 +10,15 @@
 (defn nav-link [uri title page-key active-page]
   "Entry in the navigation bar for parts of the application"
   [:span.header-item
-   [:a
-    {:class (when (= active-page page-key) "is-active")
-      :href uri
-      :on-click #(dispatch [:toggle-nav])}
-    title]])
+    [:a
+      {:class (when (= active-page page-key) "is-active")
+        :href uri
+        :on-click #(dispatch [:toggle-nav])}
+      title]])
 
-(defn navbar [active-page]
+(defn navbar []
   (let [collapsed? (subscribe [:nav-collapsed?])]
-    (fn []
+    (fn [active-page]
       [:header.header
        [:div.container
         [:div.header-left
@@ -28,8 +28,8 @@
           [:span] [:span] [:span]]
         [:div.header-right.header-menu
          {:class (when-not @collapsed? "is-active")}
-         [nav-link "#/" "Home" :front active-page]
-         [nav-link "#/admin" "Admin" :admin active-page]]]])))
+         [nav-link "/" "Home" :front active-page]
+         [nav-link "/admin" "Admin" :admin active-page]]]])))
 
 (defn front-panel []
   (let [projects (subscribe [:projects])]
@@ -38,7 +38,7 @@
           (if (= 1 (count @projects))
             (do
               (set! (-> js/window .-location .-hash)
-                    (str "#/tag/" (-> @projects vals first :id)))
+                    (str "/tag/" (-> @projects vals first :id)))
               [:h1.title "Start tagging!"])
             [:div
               [:h1.title "Hi there!"]
