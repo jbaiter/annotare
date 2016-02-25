@@ -150,8 +150,8 @@
     (verify-sentence sent))
   (->> sentences
        (map sent->row)
-       (apply (partial jdbc/insert! q/conn :sentences [:tokens :tags :document_id]))
-       (reduce +)))
+       (apply (partial jdbc/insert! q/conn :sentences))
+       (count)))
 
 (defn delete-sentence! [id]
   (let [deleted (get-sentence id)]

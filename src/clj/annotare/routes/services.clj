@@ -62,7 +62,30 @@
         (GET "/documents" []
           :return       [Document]
           :summary      "Retrieve all documents in a project"
-          (ok (db/get-project-documents id)))))
+          (ok (db/get-project-documents id)))
+
+        (POST "/documents/import/:fmt" []
+          :return       Document
+          :path-params  [fmt :- (s/enum :txt :tcf)]
+          :multipart-params [file :- TempFileUpload]
+          :middleware [wrap-multipart-params]
+          :summary      "Upload a file and import all sentences contained in it
+                         into a new document"
+          (let [{:keys [empty_tag]} (db/get-project-tagset id)
+                doc                 (db/create-document! {:project_id id
+                                                          :name (:filename file)})
+                parser (fmt parsers)
+                num-sents (->> file
+                               :tempfile
+                               parser
+                               (filter not-empty)
+                               (map (fn [tokens]
+                                       {:tokens tokens
+                                         :tags (vec (repeat (count tokens) empty_tag))
+                                         :document_id (:id doc)}))
+                               db/create-sentences!)]
+              (ok (db/get-document (:id doc)))))))
+
     (context "/tagset" []
       (GET "/" []
         :return   [Tagset]
@@ -118,24 +141,6 @@
         :summary      "Create a new sentence in the document"
         (ok (db/create-sentence! (assoc sent :document_id id))))
 
-      (POST "/sentences/import/:fmt" []
-        :return       s/Int
-        :path-params  [fmt :- (s/enum :txt :tcf)]
-        :multipart-params [file :- TempFileUpload]
-        :middleware [wrap-multipart-params]
-        :summary      "Upload a file and import all sentences contained in it
-                        into the document"
-        (let [{:keys [empty_tag]} (db/get-document-tagset id)
-              parser (fmt parsers)]
-          (ok (->> file
-                    :tempfile
-                    parser
-                    (filter not-empty)
-                    (map (fn [tokens]
-                            {:tokens tokens
-                             :tags (vec (repeat (count tokens) empty_tag))
-                             :document_id id}))
-                    db/create-sentences!))))
 
       (GET "/sentences" []
         :return       [Document]
