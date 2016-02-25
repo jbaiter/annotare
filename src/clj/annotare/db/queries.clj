@@ -5,7 +5,7 @@
 
 (def conn
   {:classname      "org.sqlite.JDBC"
-   :connection-uri (:database-url env)
+   :connection-uri (str (:database-url env) "?foreign_keys=ON")
    :naming         {:keys   clojure.string/lower-case
                     :fields clojure.string/lower-case}})
 

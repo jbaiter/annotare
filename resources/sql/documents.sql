@@ -6,22 +6,21 @@ VALUES (:name, :project_id)
 
 -- name: get-document
 -- retrieve a document given the id.
-SELECT id, name, project_id, COALESCE(c1, 0) AS sentence_count, COALESCE(c2, 0) AS untagged_count
-    FROM documents D
-    LEFT JOIN (SELECT document_id, COUNT(*) as c1
-               FROM SENTENCES) AS S1 ON D.id = S1.document_id
-    LEFT JOIN (SELECT document_id, num_edits, COUNT(*) as c2
-               FROM SENTENCES WHERE num_edits = 0) AS S2 ON D.id = S2.document_id
-    WHERE D.id = :id
+SELECT d.id, d.name, d.project_id, COUNT(s1.id) AS sentence_count,
+       COUNT(s2.id) as untagged_count FROM documents d
+    LEFT JOIN sentences AS s1 ON d.id = s1.document_id
+    LEFT JOIN sentences AS s2 ON d.id = s2.document_id AND s1.id = s2.id
+        AND s2.num_edits = 0
+    WHERE d.id = :id GROUP BY d.id
 
 -- name: get-documents
 -- retrieve all documents.
-SELECT id, name, project_id, COALESCE(c1, 0) AS sentence_count, COALESCE(c2, 0) AS untagged_count
-    FROM documents D
-    LEFT JOIN (SELECT document_id, COUNT(*) as c1
-               FROM SENTENCES) AS S1 ON D.id = S1.document_id
-    LEFT JOIN (SELECT document_id, num_edits, COUNT(*) as c2
-               FROM SENTENCES WHERE num_edits = 0) AS S2 ON D.id = S2.document_id
+SELECT d.id, d.name, d.project_id, COUNT(s1.id) AS sentence_count,
+       COUNT(s2.id) as untagged_count FROM documents d
+    LEFT JOIN sentences AS s1 ON d.id = s1.document_id
+    LEFT JOIN sentences AS s2 ON d.id = s2.document_id AND s1.id = s2.id
+        AND s2.num_edits = 0
+    GROUP BY d.id
 
 -- name: get-document-sentences
 -- retrieve all sentences for a document
@@ -29,13 +28,12 @@ SELECT * FROM sentences WHERE document_id = :id
 
 -- name: get-project-documents
 -- retrieve all documents for a project
-SELECT id, name, project_id, COALESCE(c1, 0) AS sentence_count, COALESCE(c2, 0) AS untagged_count
-    FROM documents D
-    LEFT JOIN (SELECT document_id, COUNT(*) as c1
-               FROM SENTENCES) AS S1 ON D.id = S1.document_id
-    LEFT JOIN (SELECT document_id, num_edits, COUNT(*) as c2
-               FROM SENTENCES WHERE num_edits = 0) AS S2 ON D.id = S2.document_id
-    WHERE D.project_id = :id
+SELECT d.id, d.name, d.project_id, COUNT(s1.id) AS sentence_count,
+       COUNT(s2.id) as untagged_count FROM documents d
+    LEFT JOIN sentences AS s1 ON d.id = s1.document_id
+    LEFT JOIN sentences AS s2 ON d.id = s2.document_id AND s1.id = s2.id
+        AND s2.num_edits = 0
+    WHERE d.project_id = :id GROUP BY d.id
 
 -- name: update-document!
 -- update an existing document record
