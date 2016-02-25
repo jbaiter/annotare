@@ -9,7 +9,7 @@
 (use-fixtures
   :each
   (fn [f]
-    (io/delete-file (last (clojure.string/split (:database-url env) #":")))
+    (io/delete-file (last (clojure.string/split (:database-url env) #":")) true)
     (migrations/migrate ["migrate"])
     (f)))
 
@@ -40,6 +40,7 @@
 
 
 (deftest test-projects
+  (db/create-tagset! dummy-tagset)
   (let [project-stored (db/create-project! dummy-project)
         project-updated (merge project-stored {:name "updated"
                                                :description "updated"})]
@@ -54,6 +55,8 @@
     (is (nil? (db/get-project 1)))))
 
 (deftest test-documents
+  (db/create-tagset! dummy-tagset)
+  (db/create-project! dummy-project)
   (let [doc-stored (db/create-document! dummy-document)
         doc-updated (merge doc-stored {:name "foo"})]
     (is (= (merge dummy-document {:id 1 :sentence_count 0 :untagged_count 0})
@@ -102,4 +105,9 @@
                  (db/create-sentence! (assoc dummy-sent :tags ["O" "O" "O"]))))
 
     (is (thrown? AssertionError
-                 (db/create-sentence! (assoc dummy-sent :tags ["O" "O" "O" "FOO"]))))))
+                 (db/create-sentence! (assoc dummy-sent :tags ["O" "O" "O" "FOO"]))))
+
+    (is (empty? (do (db/create-sentence! dummy-sent)
+                    (db/delete-document! 1)
+                    (db/get-document-sentences 1))))))
+

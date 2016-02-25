@@ -8,6 +8,6 @@
     (let [response (app (request :get "/"))]
       (is (= 200 (:status response)))))
 
-  (testing "not-found route"
+  (testing "all roads lead to main"
     (let [response (app (request :get "/invalid"))]
-      (is (= 404 (:status response))))))
+      (is (= 200 (:status response))))))
