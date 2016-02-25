@@ -2,7 +2,8 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [subscribe dispatch]]
             [secretary.core :as secretary]
-            [annotare.util :refer [indexed]]
+            [cljs.pprint :refer [pprint]]
+            [annotare.util :refer [indexed pluralize-kw]]
             [annotare.views.admin :refer [admin-panel]]
             [annotare.views.tagging :refer [tagging-panel]]
             [markdown.core :refer [md->html]]))
@@ -17,7 +18,7 @@
       title]])
 
 (defn navbar []
-  (let [collapsed? (subscribe [:nav-collapsed?])]
+  (let [collapsed? (subscribe [:get :nav-collapsed?])]
     (fn [active-page]
       [:header.header
        [:div.container
@@ -32,14 +33,17 @@
          [nav-link "/admin" "Admin" :admin active-page]]]])))
 
 (defn front-panel []
-  (let [projects (subscribe [:projects])]
+  (let [projects (subscribe [:get :projects])]
     (fn []
         [:section.hero>div.hero-content>div.container
-          (if (= 1 (count @projects))
-            (do
-              (set! (-> js/window .-location .-hash)
-                    (str "/tag/" (-> @projects vals first :id)))
-              [:h1.title "Start tagging!"])
+          (case (count @projects)
+            0 [:div
+                [:h1.title "Looks like there are no projects at the moment."]
+                [:h2.subtitle "Head over to the " [:a {:href "/admin"} "admin area"] " to create one."]]
+            1 (do
+                (set! (-> js/window .-location)
+                      (str "/tag/" (-> @projects vals first :id)))
+                [:h1.title "Start tagging!"])
             [:div
               [:h1.title "Hi there!"]
               [:h2.subtitle "Pick a project to start tagging."]
@@ -49,7 +53,7 @@
 
 
 (defn delete-modal [{:keys [object-type object-id]}]
-  (let [obj (subscribe [object-type object-id])]
+  (let [obj (subscribe [:get (pluralize-kw object-type) object-id])]
     (fn []
       [:div.modal.is-active
        [:div.modal-background]
@@ -75,7 +79,7 @@
        [:button.modal-close {:on-click #(dispatch [:toggle-modal])}]])))
 
 (defn tagging-help-modal [{:keys [object-id]}]
-  (let [tagset (subscribe [:tagset object-id])]
+  (let [tagset (subscribe [:get :tagsets object-id])]
     (fn []
       [:div.modal.is-active
        [:div.modal-background]
@@ -86,8 +90,8 @@
           [:button.modal-close {:on-click #(dispatch [:toggle-modal])}]])])))
 
 (defn annotare-app []
-  (let [panel (subscribe [:active-panel])
-        modal-info (subscribe [:active-modal])]
+  (let [panel (subscribe [:get :active-panel])
+        modal-info (subscribe [:get :active-modal])]
     (fn []
       [:div
        (when-let [mtype (:type @modal-info)]

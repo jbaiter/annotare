@@ -29,7 +29,7 @@
   []
   (pushy/start! history)
   (dispatch-sync [:initialise-db])
-  (dispatch [:fetch-projects])
-  (dispatch [:fetch-tagsets])
+  (dispatch [:fetch :project :all])
+  (dispatch [:fetch :tagset :all])
   (reagent/render [annotare-app]
                   (.getElementById js/document "app")))

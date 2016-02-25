@@ -40,6 +40,7 @@
      [:meta {:charset "utf-8"}]
      [:meta {:name "viewport"
              :content  "width=device-width, initial-scale=1"}]
+     (include-css "https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css")
      (include-css "/css/screen.css")
      [:body
       mount-target

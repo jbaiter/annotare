@@ -51,7 +51,7 @@
             [lein-auto "0.1.2"]
             [lein-npm "0.6.1"]]
 
-  :npm {:dependencies [[bulma "0.0.14"]
+  :npm {:dependencies [[bulma "0.0.15"]
                        [spinners "1.2.2"]]
         :root "resources/public/js"}
 

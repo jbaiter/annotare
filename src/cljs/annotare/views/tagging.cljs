@@ -59,11 +59,11 @@
     [:button.button
       {:on-click #(dispatch [:next-sentence])}
       "Skip"]]
-   [:div.column.is-2.is-offset-1
+   [:div.column.is-2
     [:button.button.is-info
      {:on-click #(dispatch [:toggle-modal :tag-help :tagset tagset-id])}
      "Tagging guidelines"]]
-   [:div.column.is-2.is-offset-1
+   [:div.column.is-2
     [:button.button.is-success
       {:on-click (fn []
                    (.scroll js/window 0 0)
@@ -71,14 +71,18 @@
       "Done"]]])
 
 (defn tagging-panel []
-  (let [sentence (subscribe [:active-sentence])
-        project (subscribe [:active-project])]
+  (let [sentence (subscribe [:get :active-sentence])
+        project (subscribe [:active-project])
+        loading? (subscribe [:get :loading? :submit-sentence])]
     (fn []
       (let [{:keys [tagset id]} @project
             tag-colors (make-tag-colors tagset)]
-        [:section.hero.is-medium
+        [:section.hero.is-fullheight
          [:div.hero-content>div.container
-          (doall (for [[idx [tok tag]] (indexed (map vector (:tokens @sentence) (:tags @sentence)))]
-                    ^{:key idx} [tagging-token idx tok tag (:tags tagset) (get tag-colors tag) (:empty_tag tagset)]))
-          [tagging-toolbar id (:id tagset)]]]))))
+          (if @loading?
+            [:div.loading-spinner]
+            [:div
+              (doall (for [[idx [tok tag]] (indexed (map vector (:tokens @sentence) (:tags @sentence)))]
+                        ^{:key idx} [tagging-token idx tok tag (:tags tagset) (get tag-colors tag) (:empty_tag tagset)]))
+              [tagging-toolbar id (:id tagset)]])]]))))
 
