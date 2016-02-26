@@ -42,6 +42,12 @@ canvas {
     color: $grey-light;
 }
 
+.tagging-toolbar {
+    .button.next-btn {
+        width: 128px
+    }
+}
+
 
 .tag-select {
   display: inline-block;

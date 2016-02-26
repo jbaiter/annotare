@@ -1,7 +1,6 @@
 (ns annotare.subs
   (:require-macros [reagent.ratom :refer [reaction]])
-  (:require [re-frame.core :refer [dispatch register-sub subscribe]]
-            [cljs.pprint :refer [pprint]]))
+  (:require [re-frame.core :refer [dispatch register-sub subscribe]]))
 
 ;; Very simple 'getter' subscription for unmaterialised  views on the
 ;; application state

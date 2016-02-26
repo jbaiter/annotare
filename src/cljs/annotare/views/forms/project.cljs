@@ -1,7 +1,6 @@
 (ns annotare.views.forms.project
   (:require [re-frame.core :refer [subscribe dispatch]]
             [clojure.string :as string]
-            [cljs.pprint :refer [pprint]]
             [annotare.util :refer [ev->val]]
             [annotare.views.forms.common :refer [form-field]]))
 

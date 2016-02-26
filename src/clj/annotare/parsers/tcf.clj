@@ -6,6 +6,9 @@
             [clojure.data.xml :refer [parse] :as xml]
             [clojure.data.zip.xml :refer [xml-> xml1-> attr attr= text] :as zip-xml]])
 
+;; See http://weblicht.sfs.uni-tuebingen.de/weblichtwiki/index.php/The_TCF_Format
+;; for a description of the format
+
 (defn- part-seq [sizes coll]
   (lazy-seq
    (when-let [s (seq coll)]

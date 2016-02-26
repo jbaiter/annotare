@@ -1,7 +1,6 @@
 (ns annotare.views.forms.tagset
   (:require [re-frame.core :refer [subscribe dispatch]]
             [clojure.string :as string]
-            [cljs.pprint :refer [pprint]]
             [annotare.util :refer [ev->val]]
             [annotare.views.forms.common :refer [form-field]]))
 
@@ -13,7 +12,6 @@
         (case tagset-id
          :new [:h1.title "Create a new tag set"]
          [:h1.title "Edit tag set " [:em (:name tagset)]])
-        [:pre (with-out-str (pprint @tagset))]
         [form-field "Name"
           [:input.input {:type "text"
                          :default-value (:name @tagset)

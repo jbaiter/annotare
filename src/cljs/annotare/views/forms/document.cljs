@@ -2,7 +2,6 @@
   (:require [re-frame.core :refer [subscribe dispatch]]
             [reagent.core :as reagent :refer [atom]]
             [clojure.string :as string]
-            [cljs.pprint :refer [pprint]]
             [annotare.util :refer [ev->val]]
             [annotare.views.forms.common :refer [form-field]]))
 

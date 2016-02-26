@@ -3,9 +3,9 @@
             [re-frame.core :refer [subscribe dispatch]]
             [secretary.core :as secretary]
             [pushy.core :as pushy]
-            [cljs.pprint :refer [pprint]]
             [annotare.util :refer [indexed pluralize-kw]]
             [annotare.history :refer [history]]
+            [annotare.views.common :refer [icon]]
             [annotare.views.admin :refer [admin-panel]]
             [annotare.views.tagging :refer [tagging-panel]]
             [markdown.core :refer [md->html]]))
@@ -31,8 +31,8 @@
             [:span] [:span] [:span]]
           [:div.header-right.header-menu
             {:class (when-not @collapsed? "is-active")}
-            [nav-link "/" "Home" :front active-page]
-            [nav-link "/admin" "Admin" :admin active-page]]]])))
+            [nav-link "/" [icon :home] :front active-page]
+            [nav-link "/admin" [icon :cog] :admin active-page]]]])))
 
 (defn front-panel []
   (let [projects (subscribe [:get :projects])]

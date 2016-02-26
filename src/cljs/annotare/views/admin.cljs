@@ -2,7 +2,6 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [subscribe dispatch]]
             [clojure.string :as string]
-            [cljs.pprint :refer [pprint]]
             [annotare.util :refer [ev->val]]
             [annotare.views.common :refer [icon]]
             [annotare.views.forms.tagset :refer [tagset-form]]

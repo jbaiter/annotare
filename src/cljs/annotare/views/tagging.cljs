@@ -56,32 +56,48 @@
 (defn tagging-toolbar [project-id tagset-id]
   [:div.tagging-toolbar.columns.is-mobile
    [:div.column.is-2.is-offset-3
-    [:a.button
+    [:a.button.is-large.skip-btn
       {:on-click #(dispatch [:next-sentence])
        :title "Skip this sentence"}
      [icon :fast-forward]]]
    [:div.column.is-2
-    [:a.button.is-info
+    [:a.button.is-info.is-large.help--btn
      {:on-click #(dispatch [:toggle-modal :tag-help :tagset tagset-id])
       :title "View tag set documentation"}
      [icon :question-circle]]]
    [:div.column.is-2
-    [:a.button.is-success
+    [:a.button.is-success.is-large.next-btn
       {:on-click (fn []
                    (dispatch [:submit-sentence]))
        :title "Submit and get new sentence"}
       [icon :check]]]])
 
-(defn tagging-panel []
-  (let [sentence (subscribe [:get :active-sentence])
-        num-tagged (subscribe [:num-tagged-sentences])
-        project (subscribe [:active-project])
-        fetching? (subscribe [:get :loading? :initial-sentences])
-        submitting? (subscribe [:get :loading? :submit-sentence])
+(defn tagging-sentence [tokens tags tag-colors empty_tag]
+  [:div.tagging-sentence
+    (let [indexed-toks (indexed (map vector tokens tags))]
+      (doall (for [[idx [tok tag]] indexed-toks]
+                ^{:key idx}
+                [tagging-token idx tok tag (keys tag-colors)
+                               (get tag-colors tag) empty_tag])))])
+
+(defn tagging-info []
+  (let [num-tagged (subscribe [:num-tagged-sentences])
         start-time (subscribe [:get :start-time])]
     (fn []
-      (.log js/console @num-tagged)
-      (.log js/console @start-time)
+      (if-not @start-time
+        [:h2.subtitle.tagging-hint "Tap on a token to select a tag for it."]
+        (when (> @num-tagged 0)
+          (let [tagging-minutes (/ (- (.getTime (js/Date.)) @start-time) 6e4)]
+            [:p.text-centered.tagging-stats
+              "Tagged " @num-tagged " sentences in "
+              (format "%.1f" tagging-minutes) " minutes"]))))))
+
+(defn tagging-panel []
+  (let [sentence (subscribe [:get :active-sentence])
+        project (subscribe [:active-project])
+        fetching? (subscribe [:get :loading? :initial-sentences])
+        submitting? (subscribe [:get :loading? :submit-sentence])]
+    (fn []
       (let [{:keys [tagset id]} @project
             {:keys [tags empty_tag]} tagset
             tag-colors (make-tag-colors tagset)]
@@ -91,16 +107,8 @@
             (if (or @fetching? @submitting?)
               [:div.loading-spinner]
               [:div
-                (if-not @start-time
-                  [:h2.subtitle.tagging-hint "Tap on a token to select a tag for it."]
-                  (when (> @num-tagged 0)
-                    (let [tagging-minutes (/ (- (.getTime (js/Date.)) @start-time) 6e4)]
-                      [:p.text-centered.tagging-stats
-                       "Tagged " @num-tagged " sentences in " (format "%.1f" tagging-minutes) " minutes"])))
-                [:div.tagging-sentence
-                  (let [indexed-toks (indexed (map vector (:tokens @sentence) (:tags @sentence)))]
-                    (doall (for [[idx [tok tag]] indexed-toks]
-                              ^{:key idx}
-                              [tagging-token idx tok tag tags (get tag-colors tag) empty_tag])))]])]
+                [tagging-info]
+                [tagging-sentence (:tokens @sentence) (:tags @sentence)
+                                  tag-colors empty_tag]])]
           (when (not (or @fetching? @submitting?))
               [tagging-toolbar id (:id tagset)])]]))))
