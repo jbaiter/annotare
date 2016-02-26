@@ -29,8 +29,7 @@
 (defn tagging-token [token-idx token current-tag tag-set color empty-tag]
   "A single token that is to be tagged"
   (let [extra-space 6
-        text-width (get-text-width token "Helvetica Neue" "28px")
-        max-tag-width (get-text-width (apply (partial max-key count) tag-set) "Helvetica Neue" "10px")
+        text-width (get-text-width token "Libre Caslon Display" "28px")
         tag-width (get-text-width current-tag "Helvetica Neue" "10px")
         select-width (+ text-width tag-width extra-space)
         tok-margin (- select-width (/ (- select-width text-width) 2))
@@ -38,7 +37,7 @@
         ;; value on `select` elements is doubled (http://stackoverflow.com/q/28108434)
         tag-indent (/ (- select-width tag-width)
                       (if (is-firefox?) 4 2))]
-    [:div.tag-select {:style {:margin-right (str max-tag-width "px")}}
+    [:div.tag-select
       [:select {:style {:width (str select-width "px")
                         :text-indent (str tag-indent "px")
                         :color color}
@@ -87,19 +86,21 @@
             {:keys [tags empty_tag]} tagset
             tag-colors (make-tag-colors tagset)]
         [:section.hero.is-fullheight.tagging-container
-         [:div.hero-content>div.container
-          (if (or @fetching? @submitting?)
-            [:div.loading-spinner]
-            [:div
-              [:div.tagging-sentence
-                (let [indexed-toks (indexed (map vector (:tokens @sentence) (:tags @sentence)))]
-                  (doall (for [[idx [tok tag]] indexed-toks]
-                            ^{:key idx}
-                            [tagging-token idx tok tag tags (get tag-colors tag) empty_tag])))
-                [tagging-toolbar id (:id tagset)]
-                (when-not @start-time
-                  [:h2.subtitle.tagging-hint "Tap on a token to select a tag for it."])]])]
-         (when (> @num-tagged 0)
-          (let [tagging-minutes (/ (- (.getTime (js/Date.)) @start-time) 6e4)]
-            [:div.hero-footer>p.container.text-centered.tagging-stats
-              "Tagged " @num-tagged " sentences in " (format "%d" tagging-minutes) " minutes"]))]))))
+         [:div.hero-content
+          [:div.container
+            (if (or @fetching? @submitting?)
+              [:div.loading-spinner]
+              [:div
+                (if-not @start-time
+                  [:h2.subtitle.tagging-hint "Tap on a token to select a tag for it."]
+                  (when (> @num-tagged 0)
+                    (let [tagging-minutes (/ (- (.getTime (js/Date.)) @start-time) 6e4)]
+                      [:p.text-centered.tagging-stats
+                       "Tagged " @num-tagged " sentences in " (format "%.1f" tagging-minutes) " minutes"])))
+                [:div.tagging-sentence
+                  (let [indexed-toks (indexed (map vector (:tokens @sentence) (:tags @sentence)))]
+                    (doall (for [[idx [tok tag]] indexed-toks]
+                              ^{:key idx}
+                              [tagging-token idx tok tag tags (get tag-colors tag) empty_tag])))]])]
+          (when (not (or @fetching? @submitting?))
+              [tagging-toolbar id (:id tagset)])]]))))

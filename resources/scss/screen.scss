@@ -1,5 +1,7 @@
 @import 'public/js/node_modules/bulma/bulma/utilities/utilities';
 @import 'public/js/node_modules/bulma/bulma/config/variables';
+$family-serif: "Libre Caslon Display", serif;
+
 @import 'public/js/node_modules/bulma/bulma/config/generated-variables';
 @import 'public/js/node_modules/bulma/bulma/base/base';
 @import 'public/js/node_modules/bulma/bulma/elements/elements';
@@ -7,8 +9,13 @@
 @import 'public/js/node_modules/bulma/bulma/layout/layout';
 @import 'public/js/node_modules/spinners/stylesheets/_spinners';
 
+
+@font-face {
+    font-family: "Libre Caslon Display Regular";
+    src: url("/fonts/LibreCaslonDisplay-Regular.ttf");
+}
+
 html, body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   height: 100%;
 }
 
@@ -21,9 +28,20 @@ canvas {
   margin-bottom: 1.5em;
 }
 
-.tagging-toolbar {
-  margin-bottom: 3em;
+.tagging-sentence {
+    margin-bottom: 4em;
 }
+
+.tagging-hint {
+    margin-bottom: 3em;
+    color: $grey;
+}
+
+.tagging-stats {
+    margin-bottom: 3em;
+    color: $grey-light;
+}
+
 
 .tag-select {
   display: inline-block;
@@ -32,6 +50,7 @@ canvas {
     // Pass pointer-events through to the select
     pointer-events: none;
     font-size: 2em;
+    font-family: $family-serif;
   }
 
   select {
@@ -52,11 +71,6 @@ canvas {
 
 .hero.is-fullheight.tagging-container {
     min-height: calc(100vh - 50px);
-}
-
-.tagging-stats {
-    margin-bottom: 1em;
-    color: $grey;
 }
 
 .modal-box {
