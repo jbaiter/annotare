@@ -20,7 +20,7 @@
       (when is-new?
         (dispatch [:set [db-key :new] nil]))
       (dispatch [:set [db-key (:id data)] data]))
-    (dispatch [:unset [:loading? load-key]])
+    (dispatch [:unset :loading? load-key])
     (doseq [ev success-events] (dispatch ev))))
 
 (defn make-fetch-handler [type amount load-key success-events]
@@ -29,7 +29,7 @@
           data (if (= :single amount) [data] data)
           mapped (reduce #(assoc %1 (:id %2) %2) {} data)]
       (dispatch [:merge [db-key] mapped]))
-    (dispatch [:unset [:loading? load-key]])
+    (dispatch [:unset :loading? load-key])
     (doseq [ev success-events] (dispatch ev))))
 
 (defn make-endpoint
@@ -87,7 +87,7 @@
     (let [endpoint (make-endpoint obj-type {:id obj-id})]
       (DELETE endpoint
               {:headers headers
-               :handler #(do (dispatch [:unset [(pluralize-kw obj-type) obj-id]])
+               :handler #(do (dispatch [:unset (pluralize-kw obj-type) obj-id])
                              (dispatch [:toggle-modal]))
                :error-handler #(dispatch [:bad-response %])}))
     app-db))
@@ -102,10 +102,12 @@
         (str "/api/sentence/" (:id sent))
         {:headers headers
          :params sent
-         :handler       #(do (dispatch [:next-sentence])
-                             (dispatch [:unset [:loading? load-key]]))
+         :handler (make-submit-handler :sentence false load-key
+                                       [[:next-sentence]])
          :error-handler #(dispatch [:bad-response %])})
-      (assoc-in app-db [:loading? load-key] true))))
+      (-> app-db
+          (update :start-time #(if (nil? %) (.getTime (js/Date.)) %))
+          (assoc-in [:loading? load-key] true)))))
 
 (register-handler
   :fetch-random-sentences
@@ -118,7 +120,8 @@
         {:headers headers
          :params {:num (* 1.5 min-num-sentences)}
          :handler #(do (dispatch [:add-sentences %])
-                       (dispatch [:unset [:loading? load-key]]))
+                       (dispatch [:unset :loading? load-key])
+                       (doseq [ev success-events] (dispatch ev)))
          :error-handler #(dispatch [:bad-response %])})
       (assoc-in app-db [:loading? load-key] true))))
 
@@ -163,11 +166,16 @@
   :next-sentence
   [default-mw]
   (fn [app-db _]
-    (let [sent (peek (:sentence-queue app-db))
+    (let [active-sent (:active-sentence app-db)
+          sent (peek (:sentence-queue app-db))
           newq (pop (:sentence-queue app-db))
           cur-cnt (count newq)]
       (when (and (not (= cur-cnt 0)) (< cur-cnt min-num-sentences))
         (dispatch [:fetch-random-sentences]))
+      ;; Make sure we add skipped (i.e. non-submitted sentences) to the
+      ;; sentence history as well
+      (when (not (contains? (:sentences app-db) (:id active-sent)))
+        (assoc-in app-db [:sentences (:id active-sent)] active-sent))
       (-> app-db
           (assoc :active-sentence sent)
           (assoc :sentence-queue newq)))))
@@ -196,7 +204,9 @@
              (dispatch [:set-active-project proj-id])
              (when (not (= (:active-project app-db) proj-id))
                (dispatch [:clear-sentence-queue])
-               (dispatch [:fetch-random-sentences [[:next-sentence]]])))
+               (dispatch [:set [:loading? :initial-sentences] true])
+               (dispatch [:fetch-random-sentences [[:next-sentence]
+                                                   [:unset :loading? :initial-sentences]]])))
       nil)
     (-> app-db
         (assoc :active-panel new-panel))))
@@ -232,9 +242,11 @@
 
 (register-handler
   :update-tag
-  [(path :active-sentence) default-mw]
-  (fn [sent [_ idx tag]]
-    (update sent :tags #(assoc % idx tag))))
+  [default-mw]
+  (fn [app-db [_ idx tag]]
+    (-> app-db
+        (update :start-time #(if (nil? %) (.getTime (js/Date.)) %))
+        (update-in [:active-sentence :tags] #(assoc % idx tag)))))
 
 ;; Miscellaneous
 (register-handler
@@ -246,7 +258,7 @@
 (register-handler
   :unset
   default-mw
-  (fn [db [_ ks]]
+  (fn [db [_ & ks]]
     (update-in db (drop-last ks) dissoc (last ks))))
 
 (register-handler
@@ -254,6 +266,12 @@
   default-mw
   (fn [db [_ ks m]]
     (update-in db ks merge m)))
+
+(register-handler
+  :push
+  default-mw
+  (fn [db [_ ks v]]
+    (update-in db ks conj v)))
 
 (register-handler
   :initialise-db

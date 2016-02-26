@@ -1,7 +1,8 @@
 (ns annotare.views.tagging
   (:require [reagent.core :as reagent :refer [atom]]
-            [goog.string.format]
+            [reagent.format :refer [format]]
             [re-frame.core :refer [subscribe dispatch]]
+            [annotare.views.common :refer [icon]]
             [annotare.util :refer [indexed]]))
 
 ;; Offscreen-Canvas for determining text-width
@@ -15,7 +16,7 @@
   (let [tagset (disj tags empty_tag)
         num-tags (count tagset)
         hue-step (/ 360 num-tags)
-        palette (map #(goog.string/format "hsl(%d, 100%%, 40%%)" %) (range 0 360 hue-step))]
+        palette (map #(format "hsl(%d, 100%%, 40%%)" %) (range 0 360 hue-step))]
     (into {empty_tag "hsl(180, 0%, 50%)" } (map vector tagset palette))))
 
 (defn get-text-width [text font font-size]
@@ -42,7 +43,7 @@
                         :text-indent (str tag-indent "px")
                         :color color}
                 :value current-tag
-                :on-change #(dispatch [:update-tag token-idx (-> % .-target .-value)])}
+                :on-change #(do (dispatch [:update-tag token-idx (-> % .-target .-value)]))}
         (for [[idx tag] (indexed tag-set)]
           ^{:key idx} [:option {:value tag}
                        (if (and (= empty-tag current-tag)
@@ -54,35 +55,51 @@
        token]]))
 
 (defn tagging-toolbar [project-id tagset-id]
-  [:div.tagging-toolbar.columns
+  [:div.tagging-toolbar.columns.is-mobile
    [:div.column.is-2.is-offset-3
-    [:button.button
-      {:on-click #(dispatch [:next-sentence])}
-      "Skip"]]
+    [:a.button
+      {:on-click #(dispatch [:next-sentence])
+       :title "Skip this sentence"}
+     [icon :fast-forward]]]
    [:div.column.is-2
-    [:button.button.is-info
-     {:on-click #(dispatch [:toggle-modal :tag-help :tagset tagset-id])}
-     "Tagging guidelines"]]
+    [:a.button.is-info
+     {:on-click #(dispatch [:toggle-modal :tag-help :tagset tagset-id])
+      :title "View tag set documentation"}
+     [icon :question-circle]]]
    [:div.column.is-2
-    [:button.button.is-success
+    [:a.button.is-success
       {:on-click (fn []
-                   (.scroll js/window 0 0)
-                   (dispatch [:submit-sentence]))}
-      "Done"]]])
+                   (dispatch [:submit-sentence]))
+       :title "Submit and get new sentence"}
+      [icon :check]]]])
 
 (defn tagging-panel []
   (let [sentence (subscribe [:get :active-sentence])
+        num-tagged (subscribe [:num-tagged-sentences])
         project (subscribe [:active-project])
-        loading? (subscribe [:get :loading? :submit-sentence])]
+        fetching? (subscribe [:get :loading? :initial-sentences])
+        submitting? (subscribe [:get :loading? :submit-sentence])
+        start-time (subscribe [:get :start-time])]
     (fn []
+      (.log js/console @num-tagged)
+      (.log js/console @start-time)
       (let [{:keys [tagset id]} @project
+            {:keys [tags empty_tag]} tagset
             tag-colors (make-tag-colors tagset)]
-        [:section.hero.is-fullheight
+        [:section.hero.is-fullheight.tagging-container
          [:div.hero-content>div.container
-          (if @loading?
+          (if (or @fetching? @submitting?)
             [:div.loading-spinner]
             [:div
-              (doall (for [[idx [tok tag]] (indexed (map vector (:tokens @sentence) (:tags @sentence)))]
-                        ^{:key idx} [tagging-token idx tok tag (:tags tagset) (get tag-colors tag) (:empty_tag tagset)]))
-              [tagging-toolbar id (:id tagset)]])]]))))
-
+              [:div.tagging-sentence
+                (let [indexed-toks (indexed (map vector (:tokens @sentence) (:tags @sentence)))]
+                  (doall (for [[idx [tok tag]] indexed-toks]
+                            ^{:key idx}
+                            [tagging-token idx tok tag tags (get tag-colors tag) empty_tag])))
+                [tagging-toolbar id (:id tagset)]
+                (when-not @start-time
+                  [:h2.subtitle.tagging-hint "Tap on a token to select a tag for it."])]])]
+         (when (> @num-tagged 0)
+          (let [tagging-minutes (/ (- (.getTime (js/Date.)) @start-time) 6e4)]
+            [:div.hero-footer>p.container.text-centered.tagging-stats
+              "Tagged " @num-tagged " sentences in " (format "%d" tagging-minutes) " minutes"]))]))))

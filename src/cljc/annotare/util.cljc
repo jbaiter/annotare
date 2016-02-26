@@ -1,4 +1,5 @@
-(ns annotare.util)
+(ns annotare.util
+  (:require [clojure.string :as string]))
 
 (defn indexed [coll]
   "Create an [idx itm] seq over the collection, similar to Python's `enumerate`"
@@ -14,4 +15,4 @@
 
 (defn make-load-key [xs]
   "Generate a key for the :loading? map in the app state."
-  (clojure.string/join "." xs))
+  (string/join "." xs))

@@ -32,7 +32,6 @@ canvas {
     // Pass pointer-events through to the select
     pointer-events: none;
     font-size: 2em;
-    font-color: blue;
   }
 
   select {
@@ -49,6 +48,15 @@ canvas {
     appearance: none;
     border: 0px;
   }
+}
+
+.hero.is-fullheight.tagging-container {
+    min-height: calc(100vh - 50px);
+}
+
+.tagging-stats {
+    margin-bottom: 1em;
+    color: $grey;
 }
 
 .modal-box {

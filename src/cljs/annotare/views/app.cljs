@@ -2,8 +2,10 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [subscribe dispatch]]
             [secretary.core :as secretary]
+            [pushy.core :as pushy]
             [cljs.pprint :refer [pprint]]
             [annotare.util :refer [indexed pluralize-kw]]
+            [annotare.history :refer [history]]
             [annotare.views.admin :refer [admin-panel]]
             [annotare.views.tagging :refer [tagging-panel]]
             [markdown.core :refer [md->html]]))
@@ -20,17 +22,17 @@
 (defn navbar []
   (let [collapsed? (subscribe [:get :nav-collapsed?])]
     (fn [active-page]
-      [:header.header
-       [:div.container
-        [:div.header-left
-         [:a.header-item {:href "#/"} "annotare"]]
-        [:span.header-toggle
-          {:on-click #(dispatch [:toggle-nav])}
-          [:span] [:span] [:span]]
-        [:div.header-right.header-menu
-         {:class (when-not @collapsed? "is-active")}
-         [nav-link "/" "Home" :front active-page]
-         [nav-link "/admin" "Admin" :admin active-page]]]])))
+       [:header.header
+        [:div.container
+          [:div.header-left
+            [:a.header-item {:href "/"} "annotare"]]
+          [:span.header-toggle
+            {:on-click #(dispatch [:toggle-nav])}
+            [:span] [:span] [:span]]
+          [:div.header-right.header-menu
+            {:class (when-not @collapsed? "is-active")}
+            [nav-link "/" "Home" :front active-page]
+            [nav-link "/admin" "Admin" :admin active-page]]]])))
 
 (defn front-panel []
   (let [projects (subscribe [:get :projects])]
@@ -41,9 +43,8 @@
                 [:h1.title "Looks like there are no projects at the moment."]
                 [:h2.subtitle "Head over to the " [:a {:href "/admin"} "admin area"] " to create one."]]
             1 (do
-                (set! (-> js/window .-location)
-                      (str "/tag/" (-> @projects vals first :id)))
-                [:h1.title "Start tagging!"])
+                (pushy/set-token! history (str "/tag/" (-> @projects vals first :id)))
+                [:div.loading-spinner])
             [:div
               [:h1.title "Hi there!"]
               [:h2.subtitle "Pick a project to start tagging."]
@@ -91,16 +92,25 @@
 
 (defn annotare-app []
   (let [panel (subscribe [:get :active-panel])
-        modal-info (subscribe [:get :active-modal])]
+        modal-info (subscribe [:get :active-modal])
+        initial-projects-loading? (subscribe [:get :loading? :initial-projects])
+        initial-tagsets-loading? (subscribe [:get :loading? :initial-tagsets])]
     (fn []
-      [:div
-       (when-let [mtype (:type @modal-info)]
-        (case mtype
-          :delete [delete-modal (dissoc @modal-info :type)]
-          :tag-help [tagging-help-modal (dissoc @modal-info :type)]
-          nil))
-       [navbar @panel]
-       (case @panel
-         :front [front-panel]
-         :admin [admin-panel]
-         :tag   [tagging-panel])])))
+      (if (and @initial-projects-loading? @initial-tagsets-loading?)
+        [:section.hero.is-fullheight
+          [:div.hero-header]
+          [:div.hero-content>div.container
+            [:div.loading-spinner]
+            [:h1.title "Just a second"]
+            [:h2.subtitle "Loading data..."]]]
+        [:div
+          (when-let [mtype (:type @modal-info)]
+            (case mtype
+              :delete [delete-modal (dissoc @modal-info :type)]
+              :tag-help [tagging-help-modal (dissoc @modal-info :type)]
+              nil))
+          [navbar @panel]
+          (case @panel
+            :front [front-panel]
+            :admin [admin-panel]
+            :tag   [tagging-panel])]))))

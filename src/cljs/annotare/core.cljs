@@ -4,6 +4,7 @@
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [dispatch dispatch-sync]]
             [secretary.core :as secretary]
+            [annotare.history :refer [history]]
             [annotare.handlers]
             [annotare.subs]
             [annotare.views.app :refer [annotare-app]])
@@ -21,15 +22,12 @@
   (let [project-id (js/parseInt project-id)]
     (dispatch [:set-panel :tag project-id])))
 
-(def history
-  (pushy/pushy secretary/dispatch!
-               (fn [x] (when (secretary/locate-route x) x))))
 
 (defn ^:export main
   []
   (pushy/start! history)
   (dispatch-sync [:initialise-db])
-  (dispatch [:fetch :project :all])
-  (dispatch [:fetch :tagset :all])
+  (dispatch [:fetch :project :all nil :initial-projects])
+  (dispatch [:fetch :tagset :all nil :initial-tagsets])
   (reagent/render [annotare-app]
                   (.getElementById js/document "app")))

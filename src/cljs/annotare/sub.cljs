@@ -3,16 +3,6 @@
   (:require [re-frame.core :refer [dispatch register-sub subscribe]]
             [cljs.pprint :refer [pprint]]))
 
-(defn materialize-project [docs tagsets proj]
-  "Retrieve the project and its documents from the db"
-  (.log js/console (with-out-str (pprint docs)))
-  (.log js/console (with-out-str (pprint tagsets)))
-  (.log js/console (with-out-str (pprint proj)))
-  (-> proj
-      (assoc :documents
-        (filter #(= (:project_id %) (:id proj)) (vals docs)))
-      (assoc :tagset (get tagsets (:tagset_id proj)))))
-
 ;; Very simple 'getter' subscription for unmaterialised  views on the
 ;; application state
 (register-sub
@@ -53,3 +43,9 @@
                       (assoc :documents
                         (filter #(= (:project_id %) (:id proj)) (vals @docs)))
                       (assoc :tagset (get @tagsets (:tagset_id proj)))))))))
+
+(register-sub
+  :num-tagged-sentences
+  (fn [db _]
+    (let [sentences (subscribe [:get :sentences])]
+      (reaction (count (filter #(> (:num_edits %) 0) (vals @sentences)))))))

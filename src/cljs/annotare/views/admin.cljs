@@ -49,8 +49,10 @@
         upload (subscribe [:get :upload])
         uploading? (subscribe [:get :loading? load-key])]
     (fn []
-      [:div.project-toolbar
-        [:p.control.is-grouped
+      [:div.project-toolbar.columns
+        [:div.column.is-quarter
+          [:label "Import documents"]]
+        [:p.control.is-grouped.column
           [:input.input
            {:type "file"
             :multiple true
@@ -64,7 +66,7 @@
           [:a.button.is-primary
             {:on-click #(dispatch [:upload-documents (:id proj) load-key])
              :class (when @uploading? "is-loading")}
-            "Import documents"]]])))
+            [icon :cloud-upload]]]])))
 
 (defn project-header [{:keys [id name description] :as proj}]
   [:div.project-header
@@ -120,8 +122,8 @@
           @active-project
           [:div
             [project-header @active-project]
-            [project-toolbar @active-project]
-            [document-table (:documents @active-project)]]
+            [document-table (:documents @active-project)]
+            [project-toolbar @active-project]]
 
           :else
           [:h1.title "Pick something"])]])))
