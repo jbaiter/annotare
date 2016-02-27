@@ -2,8 +2,9 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [reagent.format :refer [format]]
             [re-frame.core :refer [subscribe dispatch]]
+            [clojure.string :as string]
             [annotare.views.common :refer [icon]]
-            [annotare.util :refer [indexed]]))
+            [annotare.util :refer [indexed pair-seq]]))
 
 ;; Offscreen-Canvas for determining text-width
 (def offscreen-canvas (.createElement js/document "canvas"))
@@ -11,6 +12,9 @@
 (defn is-firefox? []
   "Check if we're running on Firefox"
   (exists? js/InstallTrigger))
+
+(defn strip-tag [tag]
+  (string/replace tag #"^B-", ""))
 
 (defn make-tag-colors [{:keys [empty_tag tags]}]
   (let [tagset (disj tags empty_tag)
@@ -26,7 +30,7 @@
     (set! (.-font ctx) (str font-size " " font))
     (.-width (.measureText ctx text))))
 
-(defn tagging-token [token-idx token current-tag tag-set color empty-tag]
+(defn tagging-token [token-idx token current-tag tag-set color empty-tag prev-tag]
   "A single token that is to be tagged"
   (let [extra-space 6
         text-width (get-text-width token "Libre Caslon Display" "28px")
@@ -48,7 +52,9 @@
                        (if (and (= empty-tag current-tag)
                                 (= empty-tag tag))
                          " "
-                         tag)])]
+                         tag)])
+        (if (and (not (nil? prev-tag)) (not= prev-tag empty-tag))
+          ^{:key :begin} [:option (str "B-" prev-tag)])]
       [:span.token {:style {:margin-left (str "-" tok-margin "px")
                             :color color}}
        token]]))
@@ -74,11 +80,13 @@
 
 (defn tagging-sentence [tokens tags tag-colors empty_tag]
   [:div.tagging-sentence
-    (let [indexed-toks (indexed (map vector tokens tags))]
-      (doall (for [[idx [tok tag]] indexed-toks]
+    (let [indexed-toks (indexed (pair-seq (map vector tokens tags) 2))
+          tagset (-> tag-colors keys sort)]
+      (doall (for [[idx [[_ prev-tag] [tok tag]]] indexed-toks]
                 ^{:key idx}
-                [tagging-token idx tok tag (keys tag-colors)
-                               (get tag-colors tag) empty_tag])))])
+                [tagging-token idx tok tag tagset
+                               (get tag-colors (strip-tag tag)) empty_tag
+                               prev-tag])))])
 
 (defn tagging-info []
   (let [num-tagged (subscribe [:num-tagged-sentences])

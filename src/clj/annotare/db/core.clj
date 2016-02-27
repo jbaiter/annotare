@@ -1,25 +1,29 @@
 (ns annotare.db.core
   (:require
-    [clojure.string :as s]
+    [clojure.string :as string]
     [clojure.java.jdbc :as jdbc]
     [annotare.db.queries :as q]))
 
 
 ;; Util
 (defn- col->set [col-key row]
-  (update row col-key #(set (s/split % #" "))))
+  (update row col-key #(set (string/split % #" "))))
 
 (defn- set->col [col-key row]
-  (update row col-key (partial s/join " ")))
+  (update row col-key (partial string/join " ")))
 
 (defn- get-insert-id [x]
   ((keyword "last_insert_rowid()") x))
 
 (defn- row->sent [r]
-  (reduce (fn [m k] (update-in m [k] #(s/split % #" "))) r [:tokens :tags]))
+  (reduce (fn [m k] (update-in m [k] #(string/split % #" "))) r [:tokens :tags]))
 
 (defn- sent->row [s]
-  (reduce (fn [m k] (update-in m [k] (partial s/join " "))) s [:tokens :tags]))
+  (reduce (fn [m k] (update-in m [k] (partial string/join " "))) s [:tokens :tags]))
+
+(defn reduce-tags [tags]
+  "Reduce tags to their basic form, i.e. remove `B-` and `I-` prefixes"
+  (map #(string/replace % #"B-|I-" "") tags))
 
 
 ;; Projects
@@ -123,6 +127,7 @@
 
 (defn- verify-sentence [s]
   (let [tagset (-> s :document_id get-document-tagset :tags)
+        tags (-> s :tags reduce-tags)
         extra-tags (clojure.set/difference (set (:tags s)) tagset)]
     (assert (= (count (:tags s)) (count (:tokens s)))
             ":tags and :tokens must be of equal length!")

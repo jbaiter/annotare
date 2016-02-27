@@ -16,3 +16,13 @@
 (defn make-load-key [xs]
   "Generate a key for the :loading? map in the app state."
   (string/join "." xs))
+
+(defn pair-seq
+  "Generate a seq of pairs from a given seq"
+  ([xs n] (pair-seq xs n true))
+  ([xs n pad?]
+   (if (>= (count xs) n)
+    (let [pad-val (when (sequential? (first xs))
+                    (vec (repeat (count (first xs)) nil)))
+          xs-pad (if pad? (into (vec (repeat (dec n) pad-val)) xs) xs)]
+      (lazy-seq (cons (vec (take n xs-pad)) (pair-seq (rest xs-pad) n false)))))))
