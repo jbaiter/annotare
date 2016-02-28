@@ -61,6 +61,11 @@
 
 (defn tagging-toolbar [project-id has-prev?]
   [:div.tagging-toolbar
+    (when has-prev?
+      [:a.button.is-large.prev-btn
+       {:on-click #(dispatch [:previous-sentence])
+        :title "Go to previous sentence"}
+       [icon :rewind]])
     [:a.button.is-large.skip-btn
       {:on-click #(dispatch [:next-sentence])
        :title "Skip this sentence"}

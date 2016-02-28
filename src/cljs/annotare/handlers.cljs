@@ -179,6 +179,19 @@
           (assoc :sentence-queue newq)))))
 
 (register-handler
+  :previous-sentence
+  [default-mw]
+  (fn [app-db _]
+    (let [cur-active (:active-sentence app-db)
+          prev-active (-> app-db :sentences vals last)]
+      (-> app-db
+          (assoc :active-sentence prev-active)
+          (update :sentences #(into (array-map) (drop-last %)))
+          (update :sentence-queue #(-> cljs.core/PersistentQueue.EMPTY
+                                      (conj cur-active)
+                                      (into %)))))))
+
+(register-handler
   :bad-response
   default-mw
   (fn [app-db [_ error]]
