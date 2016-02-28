@@ -102,8 +102,7 @@
         (str "/api/sentence/" (:id sent))
         {:headers headers
          :params sent
-         :handler (make-submit-handler :sentence false load-key
-                                       [[:next-sentence]])
+         :handler (make-submit-handler :sentence false load-key [])
          :error-handler #(dispatch [:bad-response %])})
       (-> app-db
           (update :start-time #(if (nil? %) (.getTime (js/Date.)) %))
@@ -128,8 +127,6 @@
 (register-handler
   :add-sentences
   (fn [app-db [_ sentences]]
-    (when-not (:active-sentence app-db)
-      (dispatch [:next-sentence]))
     (update app-db :sentence-queue #(apply (partial conj %) sentences))))
 
 (register-handler
@@ -172,11 +169,12 @@
           cur-cnt (count newq)]
       (when (and (not (= cur-cnt 0)) (< cur-cnt min-num-sentences))
         (dispatch [:fetch-random-sentences]))
-      ;; Make sure we add skipped (i.e. non-submitted sentences) to the
-      ;; sentence history as well
-      (when (not (contains? (:sentences app-db) (:id active-sent)))
-        (assoc-in app-db [:sentences (:id active-sent)] active-sent))
+      ;; Scroll to the top of the viewport
+      (.scrollTo js/window 0 0)
       (-> app-db
+          (#(if (nil? active-sent)
+              %
+              (assoc-in % [:sentences (:id active-sent)] active-sent)))
           (assoc :active-sentence sent)
           (assoc :sentence-queue newq)))))
 
@@ -234,7 +232,7 @@
 (register-handler
   :toggle-modal
   [(path :active-modal) default-mw]
-  (fn [active-modal [_ modal-type object-type object-id]]
+  (fn [active-modal [_ modal-type & [object-type object-id]]]
     (when modal-type
       {:type modal-type
        :object-type object-type

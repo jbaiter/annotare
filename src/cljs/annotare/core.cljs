@@ -26,8 +26,8 @@
 (defn ^:export main
   []
   (pushy/start! history)
-  (dispatch-sync [:initialise-db])
   (dispatch [:fetch :project :all nil :initial-projects])
   (dispatch [:fetch :tagset :all nil :initial-tagsets])
+  (dispatch-sync [:initialise-db])
   (reagent/render [annotare-app]
                   (.getElementById js/document "app")))

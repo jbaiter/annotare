@@ -96,9 +96,9 @@
 
 (defn tagging-panel []
   (let [sentence (subscribe [:get :active-sentence])
+        sentences (subscribe [:get :sentences])
         project (subscribe [:active-project])
-        fetching? (subscribe [:get :loading? :initial-sentences])
-        submitting? (subscribe [:get :loading? :submit-sentence])]
+        fetching? (subscribe [:get :loading? :initial-sentences])]
     (fn []
       (let [{:keys [tagset id]} @project
             {:keys [tags empty_tag]} tagset
@@ -106,11 +106,11 @@
         [:section.hero.is-fullheight.tagging-container
          [:div.hero-content
           [:div.container
-            (if (or @fetching? @submitting?)
+            (if @fetching?
               [:div.loading-spinner]
               [:div
                 [tagging-info]
                 [tagging-sentence (:tokens @sentence) (:tags @sentence)
                                   tag-colors empty_tag]])]
-          (when (not (or @fetching? @submitting?))
-              [tagging-toolbar id (:id tagset)])]]))))
+          (when-not @fetching?
+            [tagging-toolbar id (not (empty? @sentences))])]]))))

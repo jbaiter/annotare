@@ -85,10 +85,9 @@
 (defn annotare-app []
   (let [panel (subscribe [:get :active-panel])
         modal-info (subscribe [:get :active-modal])
-        initial-projects-loading? (subscribe [:get :loading? :initial-projects])
-        initial-tagsets-loading? (subscribe [:get :loading? :initial-tagsets])]
+        projects (subscribe [:get :projects])]
     (fn []
-      (if (and @initial-projects-loading? @initial-tagsets-loading?)
+      (if (nil? @projects)
         [:section.hero.is-fullheight
           [:div.hero-header]
           [:div.hero-content>div.container

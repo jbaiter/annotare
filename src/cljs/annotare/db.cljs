@@ -5,11 +5,11 @@
 
 ;; Initial state
 (def default-value
-  {:projects {}  ;; All available projects
-   :documents {}  ;; All available documents
+  {:projects nil  ;; All available projects
+   :documents nil  ;; All available documents
    :sentences (array-map)  ;; Sentences that were tagged in this session,
                            ;; we need to know the insertion order, so we use array-map
-   :tagsets {}  ;; All available tag sets
+   :tagsets nil  ;; All available tag sets
    :start-time nil  ;; When has the user started tagging?
    :sentence-queue cljs.core/PersistentQueue.EMPTY  ;; Next sentences to be tagged
    :active-panel :front
