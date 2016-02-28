@@ -10,29 +10,21 @@
             [annotare.views.tagging :refer [tagging-panel]]
             [markdown.core :refer [md->html]]))
 
-(defn nav-link [uri title page-key active-page]
+(defn nav-link [uri title page-key active-page title]
   "Entry in the navigation bar for parts of the application"
-  [:span.header-item
     [:a
       {:class (when (= active-page page-key) "is-active")
-        :href uri
-        :on-click #(dispatch [:toggle-nav])}
-      title]])
+       :title title
+       :href uri}
+      title])
 
-(defn navbar []
-  (let [collapsed? (subscribe [:get :nav-collapsed?])]
-    (fn [active-page]
-       [:header.header
-        [:div.container
-          [:div.header-left
-            [:a.header-item {:href "/"} "annotare"]]
-          [:span.header-toggle
-            {:on-click #(dispatch [:toggle-nav])}
-            [:span] [:span] [:span]]
-          [:div.header-right.header-menu
-            {:class (when-not @collapsed? "is-active")}
-            [nav-link "/" [icon :home] :front active-page]
-            [nav-link "/admin" [icon :cog] :admin active-page]]]])))
+(defn navbar [active-page]
+    [:footer.footer>div.container.is-text-centered
+      [:a.icon {:title "Home" :href "/"} [icon :home]]
+      [:a.icon {:title "Admin" :href "/admin"} [icon :cog]]
+      [:a.icon {:on-click #(dispatch [:toggle-modal :tag-help])
+                :title "View tag set documentation"}
+        [icon :question-circle]]])
 
 (defn front-panel []
   (let [projects (subscribe [:get :projects])]
@@ -80,11 +72,11 @@
        [:button.modal-close {:on-click #(dispatch [:toggle-modal])}]])))
 
 (defn tagging-help-modal [{:keys [object-id]}]
-  (let [tagset (subscribe [:get :tagsets object-id])]
+  (let [project (subscribe [:active-project])]
     (fn []
       [:div.modal.is-active
        [:div.modal-background]
-       (let [{:keys [name documentation]} @tagset]
+       (let [{:keys [name documentation]} (:tagset @project)]
         [:div.modal-container>div.modal-content>div.modal-box
           [:h1.title "Guidelines for tagset \"" name "\""]
           [:div {:dangerouslySetInnerHTML {:__html (md->html documentation)}}]
@@ -109,8 +101,8 @@
               :delete [delete-modal (dissoc @modal-info :type)]
               :tag-help [tagging-help-modal (dissoc @modal-info :type)]
               nil))
-          [navbar @panel]
           (case @panel
             :front [front-panel]
             :admin [admin-panel]
-            :tag   [tagging-panel])]))))
+            :tag   [tagging-panel])
+          [navbar @panel]]))))

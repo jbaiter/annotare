@@ -59,24 +59,18 @@
                             :color color}}
        token]]))
 
-(defn tagging-toolbar [project-id tagset-id]
-  [:div.tagging-toolbar.columns.is-mobile
-   [:div.column.is-2.is-offset-3
+(defn tagging-toolbar [project-id has-prev?]
+  [:div.tagging-toolbar
     [:a.button.is-large.skip-btn
       {:on-click #(dispatch [:next-sentence])
        :title "Skip this sentence"}
-     [icon :fast-forward]]]
-   [:div.column.is-2
-    [:a.button.is-info.is-large.help--btn
-     {:on-click #(dispatch [:toggle-modal :tag-help :tagset tagset-id])
-      :title "View tag set documentation"}
-     [icon :question-circle]]]
-   [:div.column.is-2
-    [:a.button.is-success.is-large.next-btn
+     [icon :fast-forward]]
+    [:a.button..is-large.next-btn
       {:on-click (fn []
+                   (dispatch [:next-sentence])
                    (dispatch [:submit-sentence]))
        :title "Submit and get new sentence"}
-      [icon :check]]]])
+      [icon :check]]])
 
 (defn tagging-sentence [tokens tags tag-colors empty_tag]
   [:div.tagging-sentence

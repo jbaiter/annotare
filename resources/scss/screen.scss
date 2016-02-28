@@ -23,6 +23,22 @@ canvas {
   font-size: 14px;
 }
 
+.footer {
+    background: white;
+    padding: 0;
+    height: 10vh;
+
+    .container {
+        box-shadow: none;
+    }
+
+    .icon {
+        color: $grey;
+        margin-left: 0.75rem;
+        margin-right: 0.75rem;
+    }
+}
+
 .loading-spinner {
   @include spinner(3em, 2s);
   margin-bottom: 1.5em;
@@ -43,6 +59,9 @@ canvas {
 }
 
 .tagging-toolbar {
+    .button {
+        margin-left: 0.25rem;
+    }
     .button.next-btn {
         width: 128px
     }
@@ -76,7 +95,7 @@ canvas {
 }
 
 .hero.is-fullheight.tagging-container {
-    min-height: calc(100vh - 50px);
+    min-height: 90vh;
 }
 
 .modal-box {
