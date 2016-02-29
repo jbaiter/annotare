@@ -65,15 +65,15 @@
       [:a.button.is-large.prev-btn
        {:on-click #(dispatch [:previous-sentence])
         :title "Go to previous sentence"}
-       [icon :rewind]])
+       [icon :fast-backward]])
     [:a.button.is-large.skip-btn
       {:on-click #(dispatch [:next-sentence])
        :title "Skip this sentence"}
      [icon :fast-forward]]
     [:a.button..is-large.next-btn
       {:on-click (fn []
-                   (dispatch [:next-sentence])
-                   (dispatch [:submit-sentence]))
+                   (dispatch [:submit-sentence])
+                   (dispatch [:next-sentence]))
        :title "Submit and get new sentence"}
       [icon :check]]])
 
