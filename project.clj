@@ -102,12 +102,13 @@
                                  [ring/ring-mock "0.3.0"]
                                  [ring/ring-devel "1.4.0"]
                                  [pjstadig/humane-test-output "0.7.1"]
-                                 [com.cemerick/piggieback "0.2.2-SNAPSHOT"]
+                                 [binaryage/devtools "0.5.2"]
+                                 [binaryage/dirac "0.1.3"]
                                  [lein-doo "0.1.6"]
                                  [lein-figwheel "0.5.0-6"]
                                  [mvxcvi/puget "1.0.0"]]
                   :plugins [[lein-figwheel "0.5.0-6"] [lein-doo "0.1.6"] [org.clojure/clojurescript "1.7.228"]]
-                   :cljsbuild
+                  :cljsbuild
                    {:builds
                     {:app
                      {:source-paths ["env/dev/cljs"]
@@ -128,16 +129,20 @@
                   {:http-server-root "public"
                    :server-port 3449
                    :nrepl-port 7002
-                   :nrepl-middleware ["cemerick.piggieback/wrap-cljs-repl"]
+                   :nrepl-middleware ["dirac.nrepl.middleware/dirac-repl"]
                    :css-dirs ["resources/public/css"]
                    :ring-handler annotare.handler/app}
+
                   :doo {:build "test"}
                   :source-paths ["env/dev/clj"]
                   :resource-paths ["env/dev/resources"]
-                  :repl-options {:init-ns user}
-                  :injections [(require 'pjstadig.humane-test-output)
-                               (pjstadig.humane-test-output/activate!)]
-                  ;;when :nrepl-port is set the application starts the nREPL server on load
+                  :repl-options
+                  {:init-ns user
+                   :port 8230
+                   :nrepl-middleware [dirac.nrepl.middleware/dirac-repl]
+                   :init (do
+                           (require 'dirac.agent)
+                           (dirac.agent/boot!))}
                   :env {:dev        true
                         :port       3000
                         :max-body-size (* 1024 1024 32)
