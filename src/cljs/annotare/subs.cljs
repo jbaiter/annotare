@@ -1,6 +1,57 @@
 (ns annotare.subs
   (:require-macros [reagent.ratom :refer [reaction]])
-  (:require [re-frame.core :refer [dispatch register-sub subscribe]]))
+  (:require [re-frame.core :as rf :refer [dispatch subscribe]]))
+
+
+;; When running in debug mode, use a custom `register-sub` implementation that
+;; records each subscription's runtime and offers functions to get an overview
+;; TODO: Try to make these available in the `cljs/user` namespace
+(if-not goog.DEBUG
+  (def register-sub rf/register-sub)
+  (do
+    (defonce subcounts (atom {}))
+
+    (aset js/document "subcounts_table" #(.table js/console (clj->js
+                                                              (for [[k vs]
+                                                                    (reverse (sort-by :total-time @subcounts))]
+                                                                (assoc vs :subscription (str k))))))
+
+    (aset js/document "subcounts" #(.log js/console (into (sorted-map-by :total-time) @subcounts)))
+
+
+    (aset js/document "subcountsclear" #(reset! subcounts {}))
+
+    (aset js/document "subcounttotal" #(pr (apply + 0 (map :total-time (vals @subcounts)))))
+
+    (defn update-sub-count
+      [subcount duration]
+      (let [call-count (inc (:call-count subcount 0))
+            total-time (+ duration (:total-time subcount 0))
+            average-time (/ total-time call-count)
+            min-time     (min (:min-time subcount js/Infinity) duration)
+            max-time     (max (:max-time subcount 0) duration)
+            first-time   (:first-time subcount duration)
+            last-time    duration]
+        {:call-count call-count
+         :total-time total-time
+         :average-time average-time
+         :first-time first-time
+         :last-time last-time
+         :min-time min-time
+         :max-time max-time}))
+
+    (defn register-sub
+      ([k _ f] (register-sub k f))
+      ([k f]   (rf/register-sub
+                 k
+                 (fn [db v] (let [child (f db v)]
+                              (reaction
+                                (let [before (.getTime (js/Date.))
+                                      child @child
+                                      after (.getTime (js/Date.))]
+                                  (swap! subcounts update k update-sub-count (- after before))
+                                  child)))))))))
+
 
 ;; Very simple 'getter' subscription for unmaterialised  views on the
 ;; application state

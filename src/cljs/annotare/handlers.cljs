@@ -1,8 +1,10 @@
 (ns annotare.handlers
+  (:require-macros [annotare.macros :refer [log]])
   (:require
     [annotare.db   :refer [default-value]]
     [annotare.util :refer [pluralize-kw make-load-key]]
-    [re-frame.core :refer [dispatch register-handler path after debug]]
+    [annotare.middleware :refer [debug]]
+    [re-frame.core :refer [dispatch register-handler path after]]
     [ajax.core     :refer [POST GET PUT DELETE]]))
 
 
@@ -94,7 +96,7 @@
 
 (register-handler
   :submit-sentence
-  [default-mw]
+  default-mw
   (fn [app-db _]
     (let [sent (:active-sentence app-db)
           load-key :submit-sentence]
@@ -110,7 +112,7 @@
 
 (register-handler
   :fetch-random-sentences
-  [default-mw]
+  default-mw
   (fn [app-db [_ success-events]]
     (let [proj-id (:active-project app-db)
           load-key :fetch-random-sentences]
@@ -126,6 +128,7 @@
 
 (register-handler
   :add-sentences
+  default-mw
   (fn [app-db [_ sentences]]
     (update app-db :sentence-queue #(apply (partial conj %) sentences))))
 
@@ -161,7 +164,7 @@
 
 (register-handler
   :next-sentence
-  [default-mw]
+  default-mw
   (fn [app-db _]
     (let [active-sent (:active-sentence app-db)
           sent (peek (:sentence-queue app-db))
@@ -180,7 +183,7 @@
 
 (register-handler
   :previous-sentence
-  [default-mw]
+  default-mw
   (fn [app-db _]
     (let [cur-active (:active-sentence app-db)
           prev-active (-> app-db :sentences vals last)]
@@ -230,7 +233,7 @@
 
 (register-handler
   :set-active-project
-  [default-mw]
+  default-mw
   (fn  [app-db [_ new-id]]
     (when (not (= (:active-project app-db) new-id))
       (dispatch [:fetch :document :all new-id]))
@@ -253,7 +256,7 @@
 
 (register-handler
   :update-tag
-  [default-mw]
+  default-mw
   (fn [app-db [_ idx tag]]
     (-> app-db
         (update :start-time #(if (nil? %) (.getTime (js/Date.)) %))
