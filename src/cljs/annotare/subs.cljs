@@ -6,8 +6,9 @@
 ;; When running in debug mode, use a custom `register-sub` implementation that
 ;; records each subscription's runtime and offers functions to get an overview
 ;; TODO: Try to make these available in the `cljs/user` namespace
-(if-not goog.DEBUG
-  (def register-sub rf/register-sub)
+(if goog.DEBUG
+  (defn register-sub [& args]
+    (apply rf/register-sub args))
   (do
     (defonce subcounts (atom {}))
 
