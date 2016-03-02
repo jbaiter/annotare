@@ -103,11 +103,9 @@
                                  [ring/ring-devel "1.4.0"]
                                  [pjstadig/humane-test-output "0.7.1"]
                                  [binaryage/devtools "0.5.2"]
-                                 [binaryage/dirac "0.1.3"]
-                                 [lein-doo "0.1.6"]
-                                 [lein-figwheel "0.5.0-6"]
+                                 [com.cemerick/piggieback "0.2.1"]
                                  [mvxcvi/puget "1.0.0"]]
-                  :plugins [[lein-figwheel "0.5.0-6"] [lein-doo "0.1.6"] [org.clojure/clojurescript "1.7.228"]]
+                  :plugins [[lein-figwheel "0.5.0-6"]]
                   :cljsbuild
                    {:builds
                     {:app
@@ -116,20 +114,13 @@
                       {:main "annotare.app"
                        :asset-path "/js/out"
                        :optimizations :none
-                       :source-map true}}
-                     :test
-                     {:source-paths ["src/cljs" "test/cljs"]
-                      :compiler
-                      {:output-to "target/test.js"
-                       :main "annotare.doo-runner"
-                       :optimizations :whitespace
-                       :pretty-print true}}}} 
+                       :source-map true}}}}
 
                   :figwheel
                   {:http-server-root "public"
                    :server-port 3449
                    :nrepl-port 7002
-                   :nrepl-middleware ["dirac.nrepl.middleware/dirac-repl"]
+                   :nrepl-middlweare ["cemerick.piggieback/wrap-cljs-repl"]
                    :css-dirs ["resources/public/css"]
                    :ring-handler annotare.handler/app}
 
@@ -138,11 +129,8 @@
                   :resource-paths ["env/dev/resources"]
                   :repl-options
                   {:init-ns user
-                   :port 8230
-                   :nrepl-middleware [dirac.nrepl.middleware/dirac-repl]
-                   :init (do
-                           (require 'dirac.agent)
-                           (dirac.agent/boot!))}
+                   :nrepl-middlweare ["cemerick.piggieback/wrap-cljs-repl"]
+                   :port 8230}
                   :env {:dev        true
                         :port       3000
                         :max-body-size (* 1024 1024 32)
