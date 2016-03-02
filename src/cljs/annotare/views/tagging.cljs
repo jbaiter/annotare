@@ -1,10 +1,14 @@
 (ns annotare.views.tagging
+  (:require-macros [annotare.macros :refer [log]])
   (:require [reagent.core :as reagent :refer [atom]]
             [reagent.format :refer [format]]
             [re-frame.core :refer [subscribe dispatch]]
             [clojure.string :as string]
+            [cljs.pprint :refer [pprint]]
             [annotare.views.common :refer [icon]]
-            [annotare.util :refer [indexed pair-seq]]))
+            [annotare.util.core :refer [ev->val]]
+            [annotare.util.common :refer [indexed pair-seq extract-entities
+                                          has-entities?]]))
 
 ;; Offscreen-Canvas for determining text-width
 (def offscreen-canvas (.createElement js/document "canvas"))
@@ -99,6 +103,70 @@
               "Tagged " @num-tagged " sentences in "
               (format "%.1f" tagging-minutes) " minutes"]))))))
 
+(defn entity-info [info]
+  [:div.card>div.card-content
+   [:div.media>div.media-content
+    [:p.title.is-5 (:name info)]
+    [:p.subtitle.is-6 (:lifespan info)]]
+   [:div.content
+    (:info info)
+    [:br]
+    [:small.a {:href (:url info)}]]])
+
+(defn linking-suggestions [query-key]
+  (let [suggestions (subscribe [:get :gnd-queries query-key])]
+    (fn [query-key]
+      ;; TODO: On click, link the entity to the tagged sequence
+      [:div.linking-suggestions
+        (for [[idx info] (indexed @suggestions)]
+          ^{:key idx} [entity-info info])])))
+
+(defn linking-widget [{:keys [tokens tag] :as ent}
+                      query-key loading? show-suggestions?]
+  (let [query (subscribe [:get :linking-inputs query-key])]
+    (fn [{:keys [tokens tag] :as ent}
+         query-key loading? show-suggestions?]
+      (let [name (string/join " " tokens)]
+        [:div.linking-widget
+          [:div.column.card
+           {:on-click #(dispatch [:set [:show-suggestions query-key]
+                                       (not show-suggestions?)])}
+           [:div.card-content
+            [:div.media
+              [:div.media-left>figure.is-32x32
+                [icon :question]]
+              [:div.media-content
+                [:p.title.is-5 name]
+                [:p.subtitle.is-6 tag]]]
+            [:div.content
+              [:em "This entity has not been linked yet."]
+              [:p.control.is-grouped
+                [:input.input {:type "text" :placeholder "Search for entities"
+                               :value (or @query name)
+                               :on-change #(dispatch [:set [:linking-inputs query-key] (ev->val %)])}]
+                [:a.button
+                  {:on-click #(do
+                                (dispatch [:query-gnd (or @query name) tag query-key])
+                                (dispatch [:set [:show-suggestions query-key] true]))
+                   :class (when loading? "is-loading")}
+                  [icon :search]]]]]]
+          (when show-suggestions?
+            [linking-suggestions query-key])]))))
+
+(defn linking-tool [tags tokens  empty_tag]
+  (let [show-suggestions (subscribe [:get :show-suggestions])
+        loading (subscribe [:get :loading?])]
+    (fn [tags tokens empty_tag]
+      [:div.columns.is-multiline
+        (doall
+          (for [[idx {:keys [tokens tag] :as ent}]
+                (-> (extract-entities tokens tags empty_tag) reverse indexed)]
+            (let [query-key (str (string/join " " tokens) "." tag)
+                  show-suggs? (get @show-suggestions query-key)]
+              (log query-key)
+              ^{:key idx} [linking-widget ent query-key (get @loading query-key)
+                                          show-suggs?])))])))
+
 (defn tagging-panel []
   (let [sentence (subscribe [:get :active-sentence])
         sentences (subscribe [:get :sentences])
@@ -109,13 +177,15 @@
             {:keys [tags empty_tag]} tagset
             tag-colors (make-tag-colors tagset)]
         [:section.hero.is-fullheight.tagging-container
-         [:div.hero-content
-          [:div.container
+         [:div.hero-content>div.container
             (if @fetching?
               [:div.loading-spinner]
               [:div
                 [tagging-info]
                 [tagging-sentence (:tokens @sentence) (:tags @sentence)
-                                  tag-colors empty_tag]])]
-          (when-not @fetching?
-            [tagging-toolbar id (not (empty? @sentences))])]]))))
+                                  tag-colors empty_tag]
+                (when (has-entities? (:tags @sentence) empty_tag)
+                  (do
+                    (log "Calling with: " (:tags @sentence))
+                    [linking-tool (:tags @sentence) (:tokens @sentence) empty_tag]))
+                [tagging-toolbar id (not (empty? @sentences))]])]]))))

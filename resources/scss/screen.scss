@@ -67,6 +67,26 @@ canvas {
     }
 }
 
+.linking-widget {
+    position: relative;
+    text-align: left;
+
+    .linking-suggestions {
+        position: absolute;
+        left: 0;
+        top: 100%;
+        z-index: 1000;
+
+        .card {
+            cursor: pointer;
+            &:hover {
+                background-color: $grey-light;
+            }
+        }
+
+    }
+}
+
 
 .tag-select {
   display: inline-block;

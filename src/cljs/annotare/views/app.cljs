@@ -3,7 +3,7 @@
             [re-frame.core :refer [subscribe dispatch]]
             [secretary.core :as secretary]
             [pushy.core :as pushy]
-            [annotare.util :refer [indexed pluralize-kw]]
+            [annotare.util.common :refer [indexed pluralize-kw]]
             [annotare.history :refer [history]]
             [annotare.views.common :refer [icon]]
             [annotare.views.admin :refer [admin-panel]]
@@ -47,7 +47,7 @@
 
 (defn delete-modal [{:keys [object-type object-id]}]
   (let [obj (subscribe [:get (pluralize-kw object-type) object-id])]
-    (fn []
+    (fn [{:keys [object-type object-id]}]
       [:div.modal.is-active
        [:div.modal-background]
        [:div.modal-container>div.modal-content>div.modal-box
@@ -73,7 +73,7 @@
 
 (defn tagging-help-modal [{:keys [object-id]}]
   (let [project (subscribe [:active-project])]
-    (fn []
+    (fn [{:keys [object-id]}]
       [:div.modal.is-active
        [:div.modal-background]
        (let [{:keys [name documentation]} (:tagset @project)]

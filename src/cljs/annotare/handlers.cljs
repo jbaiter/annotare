@@ -1,11 +1,15 @@
 (ns annotare.handlers
   (:require-macros [annotare.macros :refer [log]])
   (:require
+    [clojure.string :as string]
     [annotare.db   :refer [default-value]]
-    [annotare.util :refer [pluralize-kw make-load-key]]
+    [annotare.util.common :refer [pluralize-kw]]
+    [annotare.util.core :refer [make-load-key jsonp]]
+    [annotare.util.gnd :refer [tag->gnd-type make-gnd-querystr parse-lobid]]
     [annotare.middleware :refer [debug]]
     [re-frame.core :refer [dispatch register-handler path after]]
-    [ajax.core     :refer [POST GET PUT DELETE]]))
+    [ajax.core     :refer [POST GET PUT DELETE raw-response-format]]
+    [goog.json     :as     goog-json]))
 
 
 (def headers {"Accept" "application/transit+json"})
@@ -45,7 +49,6 @@
          :sentence (str base "/document/" (:document_id data) "/sentences")
          :document (str base "/project/" (:project_id data) "/documents")
          (make-endpoint type))))))
-
 
 ;; Backend communication
 (register-handler
@@ -161,6 +164,26 @@
          :body form-data
          :handler (make-submit-handler :document false load-key success-events)})
       (assoc-in app-db [:loading? load-key] true))))
+
+(register-handler
+  :query-gnd
+  default-mw
+  (fn [app-db [_ name tag load-key]]
+    (let [load-key (or load-key
+                       (make-load-key [:query-gnd tag name]))]
+      (do
+        (jsonp "http://lobid.org/subject"
+              {:params {:q (make-gnd-querystr name)
+                        :format "full"
+                        :type (str "http://d-nb.info/standards/elementset/gnd%23"
+                                  (tag->gnd-type tag))}
+                :handler (fn [data]
+                            (dispatch [:set [:loading? load-key] false])
+                            (dispatch [:set [:gnd-queries load-key]
+                                       (parse-lobid data)]))
+                :error-handler #(dispatch [:bad-response %])
+                :keywordize-keys? true})
+        (assoc-in app-db [:loading load-key] true)))))
 
 (register-handler
   :next-sentence

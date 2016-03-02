@@ -1,6 +1,7 @@
 (ns annotare.subs
   (:require-macros [reagent.ratom :refer [reaction]])
-  (:require [re-frame.core :as rf :refer [dispatch subscribe]]))
+  (:require [re-frame.core :as rf :refer [dispatch subscribe]]
+            [annotare.util.common :refer [extract-entities]]))
 
 
 ;; When running in debug mode, use a custom `register-sub` implementation that
@@ -100,3 +101,20 @@
   (fn [db _]
     (let [sentences (subscribe [:get :sentences])]
       (reaction (count (filter #(> (:num_edits %) 0) (vals @sentences)))))))
+
+(register-sub
+  :sentence
+  (fn [db [_ id]]
+    (let [sentence (subscribe [:get :sentences id])
+          docs (subscribe [:get :documents])
+          projs (subscribe [:get :projects])
+          tagsets (subscribe [:get :tagsets])]
+      (reaction
+        (let [empty-tag (-> @sentence :document_id
+                            (#(get @docs %)) :project_id
+                            (#(get @projs %)) :tagset_id
+                            (#(get @tagsets %)) :empty_tag)]
+          (-> @sentence
+              (assoc :entities (extract-entities (:tokens sentence)
+                                                 (:tags sentence)
+                                                 empty-tag))))))))

@@ -2,7 +2,7 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [subscribe dispatch]]
             [clojure.string :as string]
-            [annotare.util :refer [ev->val]]
+            [annotare.util.core :refer [ev->val]]
             [annotare.views.common :refer [icon]]
             [annotare.views.forms.tagset :refer [tagset-form]]
             [annotare.views.forms.project :refer [project-form]]
@@ -47,7 +47,7 @@
   (let [load-key :upload-doc
         upload (subscribe [:get :upload])
         uploading? (subscribe [:get :loading? load-key])]
-    (fn []
+    (fn [proj]
       [:div.project-toolbar.columns
         [:div.column.is-quarter
           [:label "Import documents"]]

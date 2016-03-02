@@ -1,7 +1,7 @@
 (ns annotare.views.forms.tagset
   (:require [re-frame.core :refer [subscribe dispatch]]
             [clojure.string :as string]
-            [annotare.util :refer [ev->val]]
+            [annotare.util.core :refer [ev->val]]
             [annotare.views.forms.common :refer [form-field]]))
 
 (defn tagset-form [tagset-id]
