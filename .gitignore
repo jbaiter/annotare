@@ -13,3 +13,6 @@ profiles.clj
 node_modules
 .nrepl-port
 /resources/public/css
+*.db
+.nrepl-history
+/out
