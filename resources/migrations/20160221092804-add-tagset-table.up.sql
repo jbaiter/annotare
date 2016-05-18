@@ -22,3 +22,5 @@ CREATE TABLE projects(
 INSERT INTO projects (id, name, description, tagset_id)
     SELECT p.id, p.name, description, t.id AS tagset_id FROM projects_old AS p
     JOIN tagsets AS t ON p.tagset=t.tags AND p.empty_tag = t.empty_tag;
+--;;
+DROP TABLE projects_old;
