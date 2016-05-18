@@ -124,3 +124,20 @@ canvas {
   box-shadow: 0 2 px 3px rgba(0,0,0,0.1), 0 0 0  1px rgba(0,0,0,0.1);
   padding: 40px;
 }
+
+.doc-text {
+  h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: bold;
+  }
+
+  table {
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+}
