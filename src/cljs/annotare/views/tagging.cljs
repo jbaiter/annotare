@@ -4,7 +4,6 @@
             [reagent.format :refer [format]]
             [re-frame.core :refer [subscribe dispatch]]
             [clojure.string :as string]
-            [cljs.pprint :refer [pprint]]
             [annotare.views.common :refer [icon]]
             [annotare.util.core :refer [ev->val]]
             [annotare.util.common :refer [indexed pair-seq extract-entities

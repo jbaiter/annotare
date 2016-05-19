@@ -1,7 +1,6 @@
 (ns annotare.middleware
   (:require-macros [annotare.macros :refer [log group]])
-  (:require [cljs.pprint :refer [pprint]]
-            [clojure.data :as data]))
+  (:require [clojure.data :as data]))
 
 (defn- groupEnd []
   (when (.-groupEnd js/console)
