@@ -18,7 +18,9 @@
   (exists? js/InstallTrigger))
 
 (defn strip-tag [tag]
-  (string/replace tag #"^B-", ""))
+  (if (nil? tag)
+    tag
+    (string/replace tag #"^B-", "")))
 
 (defn make-tag-colors [{:keys [empty_tag tags]}]
   (let [tagset (disj tags empty_tag)
