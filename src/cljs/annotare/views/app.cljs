@@ -79,7 +79,8 @@
        (let [{:keys [name documentation]} (:tagset @project)]
         [:div.modal-container>div.modal-content>div.modal-box
           [:h1.title "Guidelines for tagset \"" name "\""]
-          [:div.doc-text {:dangerouslySetInnerHTML {:__html (md->html documentation)}}]
+          [:div.doc-text.content
+           {:dangerouslySetInnerHTML {:__html (md->html documentation)}}]
           [:button.modal-close {:on-click #(dispatch [:toggle-modal])}]])])))
 
 (defn annotare-app []
