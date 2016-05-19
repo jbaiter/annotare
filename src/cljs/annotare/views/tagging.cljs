@@ -184,8 +184,8 @@
                 [tagging-info]
                 [tagging-sentence (:tokens @sentence) (:tags @sentence)
                                   tag-colors empty_tag]
-                (when (has-entities? (:tags @sentence) empty_tag)
-                  (do
-                    (log "Calling with: " (:tags @sentence))
-                    [linking-tool (:tags @sentence) (:tokens @sentence) empty_tag]))
+                #_(when (has-entities? (:tags @sentence) empty_tag)
+                   (do
+                     (log "Calling with: " (:tags @sentence))
+                     [linking-tool (:tags @sentence) (:tokens @sentence) empty_tag]))
                 [tagging-toolbar id (not (empty? @sentences))]])]]))))
