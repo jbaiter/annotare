@@ -48,6 +48,13 @@
         tag-indent (/ (- select-width tag-width)
                       (if (is-firefox?) 4 2))]
     [:div.tag-select
+      ;; Default to the previous tag on first click
+      (when (and (= current-tag empty-tag)
+                 (not (nil? prev-tag))
+                 (not= prev-tag empty-tag))
+        {:on-mouse-down
+         (fn [ev] (dispatch [:update-tag token-idx prev-tag])
+                  (.preventDefault ev))})
       [:select {:style {:width (str select-width "px")
                         :text-indent (str tag-indent "px")
                         :color color}
