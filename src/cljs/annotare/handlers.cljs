@@ -64,7 +64,7 @@
       (meth endpoint
             {:headers headers
              :params data
-             :handler (make-submit-handler type is-new? load-key  success-events)
+             :handler (make-submit-handler type is-new? load-key success-events)
              :error-handler #(dispatch [:bad-response %])})
       (assoc-in app-db [:loading? load-key] true))))
 
@@ -200,7 +200,9 @@
       (-> app-db
           (#(if (nil? active-sent)
               %
-              (assoc-in % [:sentences (:id active-sent)] active-sent)))
+              (-> %
+                  (assoc-in [:sentences (:id active-sent)] active-sent)
+                  (update :sentence-history conj (:id active-sent)))))
           (assoc :active-sentence sent)
           (assoc :sentence-queue newq)))))
 
@@ -209,13 +211,15 @@
   default-mw
   (fn [app-db _]
     (let [cur-active (:active-sentence app-db)
-          prev-active (-> app-db :sentences vals last)]
+          prev-active-id (-> app-db :sentence-history last)
+          prev-active (-> app-db :sentences (get prev-active-id))]
       (-> app-db
           (assoc :active-sentence prev-active)
-          (update :sentences #(into (array-map) (drop-last %)))
+          (update :sentence-history pop)
+          (update :sentences dissoc prev-active-id)
           (update :sentence-queue #(-> cljs.core/PersistentQueue.EMPTY
-                                      (conj cur-active)
-                                      (into %)))))))
+                                       (conj cur-active)
+                                       (into %)))))))
 
 (register-handler
   :bad-response

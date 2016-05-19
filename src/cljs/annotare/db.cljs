@@ -5,12 +5,13 @@
 
 ;; Initial state
 (def default-value
-  {:projects nil  ;; All available projects
-   :documents nil  ;; All available documents
-   :sentences (array-map)  ;; Sentences that were tagged in this session,
-                           ;; we need to know the insertion order, so we use array-map
-   :tagsets nil  ;; All available tag sets
-   :start-time nil  ;; When has the user started tagging?
+  {:projects nil      ;; All available projects
+   :documents nil     ;; All available documents
+   :sentences {}      ;; Sentences that were tagged in this session,
+   :sentence-history []  ;; We need to know the order in which the sentences
+                         ;; were tagged, so wee keep this list of sentence ids
+   :tagsets nil       ;; All available tag sets
+   :start-time nil    ;; When has the user started tagging?
    :sentence-queue cljs.core/PersistentQueue.EMPTY  ;; Next sentences to be tagged
    :linking-inputs {}
    :active-panel :front
