@@ -61,7 +61,8 @@
             {:value (:type @upload)
              :on-change #(dispatch [:set [:upload :type] (ev->val %)])}
             [:option {:value "txt"} "Plaintext"]
-            [:option {:value "tcf"} "TCF XML"]]
+            [:option {:value "tcf"} "TCF XML"]
+            [:option {:value "bio"} "BIO"]]
           [:a.button.is-primary
             {:on-click #(dispatch [:upload-documents (:id proj) load-key])
              :class (when @uploading? "is-loading")}

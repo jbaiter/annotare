@@ -66,23 +66,20 @@
 
         (POST "/documents/import/:fmt" []
           :return       Document
-          :path-params  [fmt :- (s/enum :txt :tcf)]
+          :path-params  [fmt :- (s/enum :txt :tcf :bio)]
           :multipart-params [file :- TempFileUpload]
           :middleware [wrap-multipart-params]
           :summary      "Upload a file and import all sentences contained in it
                          into a new document"
-          (let [{:keys [empty_tag]} (db/get-project-tagset id)
+          (let [{:keys [empty-tag]} (db/get-project-tagset id)
                 doc                 (db/create-document! {:project_id id
                                                           :name (:filename file)})
                 parser (fmt parsers)
                 num-sents (->> file
                                :tempfile
-                               parser
+                               (parser empty-tag)
                                (filter not-empty)
-                               (map (fn [tokens]
-                                       {:tokens tokens
-                                         :tags (vec (repeat (count tokens) empty_tag))
-                                         :document_id (:id doc)}))
+                               (map #(assoc % :document_id (:id doc)))
                                db/create-sentences!)]
               (ok (db/get-document (:id doc)))))))
 

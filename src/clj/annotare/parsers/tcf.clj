@@ -37,10 +37,11 @@
                   (string/split #" ")
                   count)))))
 
-(defn parse-sentences [file]
-  (with-open [rdr (jio/reader file)]
-    (doall
-      (let [root (parse rdr)
-            tokens (get-tokens root)
-            sent-lens (get-sentence-lens root)]
-        (part-seq sent-lens tokens)))))
+(defn parse-sentences [empty-tag fpath]
+  (with-open [reader (clojure.java.io/reader fpath)]
+    (let [root (parse reader)
+          tokens (get-tokens root)
+          sent-lens (get-sentence-lens root)]
+      (->> (part-seq sent-lens tokens)
+           (map (fn [ts] {:tokens ts
+                          :tags (vec (repeat (count ts) empty-tag))}))))))
