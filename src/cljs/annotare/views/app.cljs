@@ -42,7 +42,7 @@
               [:h2.subtitle "Pick a project to start tagging."]
               [:ul
                 (for [[idx {:keys [id name]}] (indexed (vals @projects))]
-                  ^{:key idx} [:li [:a {:href (str "#/tag/" id)} name]])]])])))
+                  ^{:key idx} [:li [:a {:href (str "/tag/" id)} name]])]])])))
 
 
 (defn delete-modal [{:keys [object-type object-id]}]
