@@ -44,6 +44,9 @@
                                               :limit number})]
      (map row->sent rows))))
 
+(defn get-tagged-sentences [project-id]
+  (map row->sent (q/get-tagged-sentences {:id project-id})))
+
 (defn create-project! [params]
   (-> params
       q/create-project<!
