@@ -40,9 +40,13 @@
             [:div
               [:h1.title "Hi there!"]
               [:h2.subtitle "Pick a project to start tagging."]
-              [:ul
-                (for [[idx {:keys [id name]}] (indexed (vals @projects))]
-                  ^{:key idx} [:li [:a {:href (str "/tag/" id)} name]])]])])))
+              [:div.columns
+                (for [[idx {:keys [id name description]}] (indexed (vals @projects))]
+                  ^{:key idx} [:div.column
+                               [:div.card>div.card-content
+                                [:div.media>div.media-content>p.title.is-5
+                                 [:a {:href (str "/tag/" id)} name]]
+                                [:div.content description]]])]])])))
 
 
 (defn delete-modal [{:keys [object-type object-id]}]
