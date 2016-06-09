@@ -13,6 +13,7 @@
                  [ring-webjars "0.1.1"]
                  [ring/ring-defaults "0.1.5"]
                  [ring "1.4.0" :exclusions [ring/ring-jetty-adapter]]
+                 [buddy/buddy-auth "1.0.0"]
                  [mount "0.1.8"]
                  [luminus-nrepl "0.1.2"]
                  [migratus "0.8.9"]
@@ -26,12 +27,12 @@
                  [cljs-ajax "0.5.3"]
                  [luminus-http-kit "0.1.1"]
                  [luminus-log4j "0.1.2"]
-                 [re-frame "0.7.0-alpha"]
+                 [re-frame "0.7.0"]
                  [prismatic/schema "1.0.3"]
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/data.zip "0.1.1"]
                  [metosin/compojure-api "1.0.0"]
-                 [markdown-clj "0.9.85"]
+                 [markdown-clj "0.9.89"]
                  [kibu/pushy "0.3.6"]]
 
   :min-lein-version "2.0.0"
