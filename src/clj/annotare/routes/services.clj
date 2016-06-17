@@ -6,6 +6,7 @@
            [ring.middleware.multipart-params :refer [wrap-multipart-params]]
            [schema.core :as s]
            annotare.auth.restructure
+           [annotare.util :as util]
            [annotare.db.core :as db]
            [annotare.parsers.core :refer [parsers]]
            [annotare.schemas :refer [Project Document Sentence Tagset]]))
@@ -33,7 +34,7 @@
         :path-params  [id :- Long]
 
         (GET "/" []
-          :return       [Project]
+          :return       Project
           :summary      "Retrieve a specific project"
           (ok (db/get-project id)))
 
@@ -56,6 +57,9 @@
           :summary      "Delete a project"
           :authenticated
           (ok (db/delete-project! id)))
+
+        (GET "/export" []
+          (ok (util/make-bio (db/get-tagged-sentences id))))
 
         (POST "/documents" []
           :return       Document
